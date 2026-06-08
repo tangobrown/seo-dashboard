@@ -11,6 +11,8 @@
 
     return {
       session: { userId: null, role: null, clientId: null },
+      drafts: {},
+      sent_emails: [],
       clients: [
         {
           id: 'c_northwind',
@@ -146,7 +148,8 @@
     return { id, client_id, actor, action, payload, created_at };
   }
 
-  /* Synthetic Fathom-style daily stats per client (last 30 days) */
+  /* Synthetic Fathom-style daily stats per client.
+     Generates 60 days so we can compute "last 30 vs prior 30". */
   function makeStats(clientId) {
     const today = new Date('2026-06-08T00:00:00Z');
     const baseByClient = {
@@ -154,9 +157,9 @@
     };
     const base = baseByClient[clientId] || 300;
     const rng = mulberry32(hashCode(clientId));
-    const days = [];
+    const allDays = [];
     let trend = 0;
-    for (let i = 29; i >= 0; i--) {
+    for (let i = 59; i >= 0; i--) {
       const d = new Date(today.getTime() - i * 86400000);
       trend += (rng() - 0.4) * 6;
       const noise = (rng() - 0.5) * base * 0.35;
@@ -164,8 +167,10 @@
       const wkndDip = isWeekend ? -base * 0.18 : 0;
       const pv = Math.max(40, Math.round(base + trend + noise + wkndDip));
       const uv = Math.round(pv * (0.55 + rng() * 0.12));
-      days.push({ date: d.toISOString().slice(0, 10), pageviews: pv, uniques: uv });
+      allDays.push({ date: d.toISOString().slice(0, 10), pageviews: pv, uniques: uv });
     }
+    const days = allDays.slice(-30);
+    const prev30 = allDays.slice(0, 30);
     const topPages = [
       { path: '/', pv: Math.round(base * 12 + rng() * 200) },
       { path: '/products', pv: Math.round(base * 7 + rng() * 150) },
@@ -173,7 +178,7 @@
       { path: '/blog/sourdough-101', pv: Math.round(base * 3 + rng() * 60) },
       { path: '/contact', pv: Math.round(base * 2 + rng() * 40) },
     ].sort((a, b) => b.pv - a.pv);
-    return { days, topPages, current_visitors: Math.round(2 + rng() * 18) };
+    return { days, prev30, topPages, current_visitors: Math.round(2 + rng() * 18) };
   }
   function hashCode(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return h >>> 0; }
   function mulberry32(a) { return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -181,7 +186,12 @@
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (!s.drafts) s.drafts = {};
+        if (!s.sent_emails) s.sent_emails = [];
+        return s;
+      }
     } catch (e) { /* ignore */ }
     const s = seed();
     save(s);

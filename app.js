@@ -48,47 +48,38 @@
 
   function commit() { window.DB.save(state); }
 
-  /* ---------- Icons (inline SVG) ---------- */
+  /* ---------- Icons (Remix Icon — https://remixicon.com) ---------- */
   const ICONS = {
-    dashboard: '<svg class="ico" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>',
-    clients: '<svg class="ico" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c.7-2.5 2.7-4 5-4s4.3 1.5 5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="14" cy="6" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 12.2c1.6.2 3.4 1.4 4 3.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-    recs: '<svg class="ico" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.2 4.7 5.1.6-3.8 3.6 1 5L10 13.5 5.5 16l1-5L2.7 7.3l5.1-.6L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
-    deploys: '<svg class="ico" viewBox="0 0 20 20" fill="none"><path d="M3 17l7-14 7 14H3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
-    analytics: '<svg class="ico" viewBox="0 0 20 20" fill="none"><path d="M3 17h14M5 14V9M9 14V5M13 14v-6M17 14v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-    settings: '<svg class="ico" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2m0 12v2M2 10h2m12 0h2M4.2 4.2l1.5 1.5m8.6 8.6l1.5 1.5M4.2 15.8l1.5-1.5m8.6-8.6l1.5-1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-    plus: '<svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-    check: '<svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    x: '<svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-    arrow: '<svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m-4-4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    search: '<svg class="ico" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-    sparkle: '<svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.2 3.6L13 7l-3.8 1.4L8 12l-1.2-3.6L3 7l3.8-1.4L8 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
-    external: '<svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M6 4h6v6M12 4L6.5 9.5M11 11v1.5A1.5 1.5 0 0 1 9.5 14h-5A1.5 1.5 0 0 1 3 12.5v-5A1.5 1.5 0 0 1 4.5 6H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    revert: '<svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M3 8a5 5 0 1 0 1.5-3.5L3 6M3 3v3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    dashboard: '<i class="ri-dashboard-line ico"></i>',
+    clients: '<i class="ri-team-line ico"></i>',
+    recs: '<i class="ri-lightbulb-flash-line ico"></i>',
+    deploys: '<i class="ri-rocket-2-line ico"></i>',
+    analytics: '<i class="ri-line-chart-line ico"></i>',
+    settings: '<i class="ri-settings-3-line ico"></i>',
+    plus: '<i class="ri-add-line ico"></i>',
+    check: '<i class="ri-check-line ico"></i>',
+    x: '<i class="ri-close-line ico"></i>',
+    arrow: '<i class="ri-arrow-right-line ico"></i>',
+    search: '<i class="ri-search-line ico"></i>',
+    sparkle: '<i class="ri-sparkling-2-line ico"></i>',
+    external: '<i class="ri-external-link-line ico"></i>',
+    revert: '<i class="ri-arrow-go-back-line ico"></i>',
+    system: '<i class="ri-cpu-line ico"></i>',
+    admin: '<i class="ri-user-3-line ico"></i>',
   };
 
   /* ---------- Layout shell ---------- */
   function shell(activeKey, body, opts = {}) {
-    const session = state.session;
-    const isAdmin = session.role === 'admin';
-    const navItems = isAdmin
-      ? [
-          { key: 'dashboard', label: 'Overview', icon: ICONS.dashboard, href: '#/admin' },
-          { key: 'clients', label: 'Clients', icon: ICONS.clients, href: '#/admin/clients' },
-          { key: 'recs', label: 'Recommendations', icon: ICONS.recs, href: '#/admin/recommendations' },
-          { key: 'deploys', label: 'Deploys', icon: ICONS.deploys, href: '#/admin/deploys' },
-        ]
-      : [
-          { key: 'dashboard', label: 'Overview', icon: ICONS.dashboard, href: '#/portal' },
-          { key: 'analytics', label: 'Analytics', icon: ICONS.analytics, href: '#/portal/analytics' },
-        ];
-
-    const settingsItems = isAdmin
-      ? [{ key: 'settings', label: 'Settings', icon: ICONS.settings, href: '#/admin/settings' }]
-      : [];
-
-    const initials = isAdmin ? 'YO' : (state.clients.find(c => c.id === session.clientId)?.initial || 'C');
-    const whoName = isAdmin ? 'You' : (state.clients.find(c => c.id === session.clientId)?.name || 'Client');
-    const whoRole = isAdmin ? 'Admin' : 'Viewer';
+    const navItems = [
+      { key: 'dashboard', label: 'Overview', icon: ICONS.dashboard, href: '#/admin' },
+      { key: 'clients', label: 'Clients', icon: ICONS.clients, href: '#/admin/clients' },
+      { key: 'recs', label: 'Recommendations', icon: ICONS.recs, href: '#/admin/recommendations' },
+      { key: 'deploys', label: 'Deploys', icon: ICONS.deploys, href: '#/admin/deploys' },
+    ];
+    const settingsItems = [{ key: 'settings', label: 'Settings', icon: ICONS.settings, href: '#/admin/settings' }];
+    const initials = 'YO';
+    const whoName = 'You';
+    const whoRole = 'Admin';
 
     return h`
       <div class="shell">
@@ -147,7 +138,7 @@
             <div class="points">
               <div class="point"><div class="dot">1</div><span>Pulls fresh recommendations from SiteGuru every week.</span></div>
               <div class="point"><div class="dot">2</div><span>Auto-PRs, preview-gated, one-click revertable.</span></div>
-              <div class="point"><div class="dot">3</div><span>Clients see a clean read-only portal with Fathom stats.</span></div>
+              <div class="point"><div class="dot">3</div><span>Send monthly client updates with stats baked in.</span></div>
             </div>
           </div>
           <div class="foot">A control plane for the SEO work you'd rather not do by hand.</div>
@@ -155,11 +146,7 @@
         <section class="login-form-wrap">
           <form class="login-form" data-form="login">
             <h1>Sign in</h1>
-            <p class="sub">Welcome back. Pick a demo role to explore.</p>
-            <div class="role-switch" role="tablist">
-              <button type="button" class="active" data-role="admin">Admin (you)</button>
-              <button type="button" data-role="viewer">Viewer (client)</button>
-            </div>
+            <p class="sub">Welcome back.</p>
             <div class="field">
               <label for="email">Email</label>
               <input id="email" type="email" value="you@example.com" />
@@ -167,13 +154,6 @@
             <div class="field">
               <label for="password">Password</label>
               <input id="password" type="password" value="••••••••" />
-            </div>
-            <div id="viewer-pick" style="display:none;" class="field">
-              <label for="client">Sign in as</label>
-              <select id="client">
-                ${raw(state.clients.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join(''))}
-              </select>
-              <div class="help">In production this would be inferred from the viewer's account.</div>
             </div>
             <button type="submit" class="btn primary lg" style="margin-top:8px;">Continue ${raw(ICONS.arrow)}</button>
             <p class="tiny muted" style="margin-top:16px;">Prototype — no real auth. Data lives in your browser.</p>
@@ -184,21 +164,13 @@
   }
 
   function bindLogin(root) {
-    let role = 'admin';
-    root.querySelectorAll('.role-switch button').forEach(b => {
-      b.addEventListener('click', () => {
-        role = b.dataset.role;
-        root.querySelectorAll('.role-switch button').forEach(x => x.classList.toggle('active', x === b));
-        root.querySelector('#viewer-pick').style.display = role === 'viewer' ? 'flex' : 'none';
-      });
-    });
     root.querySelector('[data-form="login"]').addEventListener('submit', (e) => {
       e.preventDefault();
-      state.session.role = role;
-      state.session.userId = role === 'admin' ? 'u_admin' : 'u_viewer';
-      state.session.clientId = role === 'viewer' ? root.querySelector('#client').value : null;
+      state.session.role = 'admin';
+      state.session.userId = 'u_admin';
+      state.session.clientId = null;
       commit();
-      location.hash = role === 'admin' ? '#/admin' : '#/portal';
+      location.hash = '#/admin';
     });
   }
 
@@ -392,7 +364,7 @@
         <div>
           <div class="eyebrow">Clients</div>
           <h1>Add a new client</h1>
-          <p class="subtitle">All you need are the four IDs that connect the dashboard to their site. The viewer login is created server-side via Supabase Auth's admin API.</p>
+          <p class="subtitle">All you need are the four IDs that connect the dashboard to their site, plus the contact email for the monthly update.</p>
         </div>
       </div>
 
@@ -429,17 +401,11 @@
           </div>
         </div>
         <hr/>
-        <h3 style="font-size:16px;">Viewer login</h3>
-        <p class="muted tiny" style="margin-top:-8px;">The client's read-only login. Created in Supabase Auth on save.</p>
-        <div class="field-row">
-          <div class="field">
-            <label>Viewer email</label>
-            <input name="viewer_email" type="email" placeholder="owner@northwindbakery.com" />
-          </div>
-          <div class="field">
-            <label>Initial password</label>
-            <input name="viewer_password" type="password" placeholder="auto-generated if blank" />
-          </div>
+        <h3 style="font-size:16px;">Client contact</h3>
+        <p class="muted tiny" style="margin-top:-8px;">Where the monthly update email gets sent.</p>
+        <div class="field">
+          <label>Contact email</label>
+          <input name="viewer_email" type="email" placeholder="owner@northwindbakery.com" />
         </div>
         <div class="row" style="margin-top:8px; gap:8px;">
           <button type="submit" class="btn primary">Create client</button>
@@ -727,13 +693,14 @@
     const cRecs = state.recommendations.filter(r => r.client_id === c.id);
     const tab = subroute || 'recs';
 
-    const tabs = ['recs', 'implementations', 'notes', 'analytics', 'settings'];
-    const tabLabels = { recs: 'Recommendations', implementations: 'Implementations', notes: 'Notes & tasks', analytics: 'Analytics', settings: 'Settings' };
+    const tabs = ['recs', 'implementations', 'notes', 'update', 'analytics', 'settings'];
+    const tabLabels = { recs: 'Recommendations', implementations: 'Implementations', notes: 'Notes & tasks', update: 'Client update', analytics: 'Analytics', settings: 'Settings' };
 
     let body = '';
     if (tab === 'recs') body = tabRecs(c, cRecs);
     else if (tab === 'implementations') body = tabImpls(c);
     else if (tab === 'notes') body = tabNotes(c);
+    else if (tab === 'update') body = tabUpdate(c);
     else if (tab === 'analytics') body = tabAnalytics(c);
     else if (tab === 'settings') body = tabClientSettings(c);
 
@@ -825,7 +792,7 @@
           <div class="card-sub" style="margin-bottom:16px;">Every accept, decline, dispatch, merge and revert.</div>
           ${audit.length ? audit.map(a => `
             <div class="tl-item">
-              <div class="tl-dot ${a.action === 'pr_merged' ? 'success' : a.action === 'declined' ? 'warn' : ''}">${a.actor === 'system' ? '⚙' : '◉'}</div>
+              <div class="tl-dot ${a.action === 'pr_merged' ? 'success' : a.action === 'declined' ? 'warn' : ''}">${a.actor === 'system' ? ICONS.system : ICONS.admin}</div>
               <div class="tl-body">
                 <div class="tl-title">${esc(a.action.replace(/_/g, ' '))}</div>
                 <div class="tl-sub">${esc(a.actor)} · ${esc(a.payload?.title || a.payload?.recommendation || '')}</div>
@@ -989,13 +956,9 @@
         </div>
       </div>
       <div class="card" style="margin-top:16px;">
-        <div class="card-title">Viewer access</div>
-        <div class="card-sub" style="margin-bottom:16px;">The read-only login for ${esc(c.name)}.</div>
-        <div class="field"><label>Viewer email</label><input value="${esc(c.viewer_email || '')}" /></div>
-        <div class="row" style="margin-top:12px; gap:8px;">
-          <button class="btn ghost">Send password reset</button>
-          <button class="btn ghost">Copy login link</button>
-        </div>
+        <div class="card-title">Client contact</div>
+        <div class="card-sub" style="margin-bottom:16px;">Where the monthly update email is sent.</div>
+        <div class="field"><label>Contact email</label><input value="${esc(c.viewer_email || '')}" /></div>
       </div>
       <div class="card" style="margin-top:16px; border-color:#f3b4b0;">
         <div class="card-title" style="color:var(--danger);">Danger zone</div>
@@ -1005,7 +968,203 @@
     `;
   }
 
-  /* ---------- VIEWER: Portal ---------- */
+  /* ---------- ADMIN: Client update (email drafter) ---------- */
+  function generateDraft(client) {
+    const s = window.DB.stats(client.id);
+    const last30Pv = s.days.reduce((a, d) => a + d.pageviews, 0);
+    const last30Uv = s.days.reduce((a, d) => a + d.uniques, 0);
+    const prev30Pv = s.prev30.reduce((a, d) => a + d.pageviews, 0);
+    const change = prev30Pv ? ((last30Pv - prev30Pv) / prev30Pv) * 100 : 0;
+    const changeStr = (change >= 0 ? '+' : '') + change.toFixed(1) + '%';
+    const dirWord = change >= 0 ? 'up' : 'down';
+
+    const today = new Date('2026-06-08T10:00:00Z');
+    const since = new Date(today.getTime() - 30 * 86400000);
+    const monthLabel = today.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+
+    const impls = state.implementations
+      .filter(i => i.client_id === client.id && new Date(i.applied_at) >= since)
+      .sort((a, b) => new Date(b.applied_at) - new Date(a.applied_at));
+
+    const doneTasks = state.tasks
+      .filter(t => t.client_id === client.id && t.status === 'done' && t.completed_at && new Date(t.completed_at) >= since)
+      .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+
+    const pendingManual = state.recommendations
+      .filter(r => r.client_id === client.id && r.type === 'manual' && r.status === 'pending');
+
+    const shortDate = (iso) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const implLines = impls.map(i => {
+      const r = state.recommendations.find(x => x.id === i.recommendation_id);
+      return `• ${r ? r.title : 'SEO improvement'} (${shortDate(i.applied_at)})`;
+    });
+    const taskLines = doneTasks.map(t => `• ${t.title} (${shortDate(t.completed_at)})`);
+    const manualLines = pendingManual.map(r => `• ${r.title}`);
+    const topPages = s.topPages.slice(0, 3).map(p => `• ${p.path} — ${fmtNum(p.pv)} views`);
+
+    const subject = `Your ${monthLabel} SEO update — ${client.name}`;
+
+    const lines = [];
+    lines.push(`Hi ${client.name} team,`);
+    lines.push('');
+    lines.push(`Here's your monthly SEO update.`);
+    lines.push('');
+    lines.push(`Traffic — last 30 days`);
+    lines.push(`• ${fmtNum(last30Pv)} pageviews (${changeStr} ${dirWord} on the previous 30 days)`);
+    lines.push(`• ${fmtNum(last30Uv)} unique visitors`);
+    lines.push('');
+    lines.push(`Top pages`);
+    topPages.forEach(l => lines.push(l));
+    lines.push('');
+    if (implLines.length) {
+      lines.push(`Changes we shipped (${implLines.length})`);
+      implLines.forEach(l => lines.push(l));
+      lines.push('');
+    }
+    if (taskLines.length) {
+      lines.push(`Manual work completed (${taskLines.length})`);
+      taskLines.forEach(l => lines.push(l));
+      lines.push('');
+    }
+    if (manualLines.length) {
+      lines.push(`For your consideration`);
+      lines.push(`A few things we'd like to talk through with you:`);
+      manualLines.forEach(l => lines.push(l));
+      lines.push('');
+    }
+    lines.push(`Happy to jump on a call if anything here needs unpacking.`);
+    lines.push('');
+    lines.push(`Thanks,`);
+    lines.push(`The SEO Autopilot team`);
+
+    return { subject, body: lines.join('\n') };
+  }
+
+  function tabUpdate(c) {
+    if (!state.drafts) state.drafts = {};
+    let draft = state.drafts[c.id];
+    if (!draft) {
+      draft = generateDraft(c);
+      state.drafts[c.id] = draft;
+      commit();
+    }
+    const sent = (state.sent_emails || []).filter(e => e.client_id === c.id).sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at));
+    const recipient = c.viewer_email || '(no contact email — add one in Settings)';
+    const noEmail = !c.viewer_email;
+
+    return `
+      <div class="card">
+        <div class="card-title">Compose monthly update</div>
+        <div class="card-sub" style="margin-bottom:20px;">Auto-drafted from this client's stats and the work we've shipped. Tweak as needed, then send.</div>
+
+        <div class="email-row">
+          <div class="email-label">To</div>
+          <div class="email-value">${esc(recipient)}</div>
+        </div>
+        <div class="email-row">
+          <div class="email-label">Subject</div>
+          <input class="email-input" data-field="subject" value="${esc(draft.subject)}" />
+        </div>
+        <textarea class="email-body" data-field="body" spellcheck="true">${esc(draft.body)}</textarea>
+
+        <div class="email-actions">
+          <div class="row" style="gap:8px;">
+            <button class="btn ghost sm" data-action="regen-draft" data-id="${c.id}">Regenerate from data</button>
+            <button class="btn ghost sm" data-action="copy-draft">Copy</button>
+          </div>
+          <button class="btn primary" data-action="send-draft" data-id="${c.id}" ${noEmail ? 'disabled' : ''}>Send update ${ICONS.arrow}</button>
+        </div>
+        <div class="email-hint">Mocked in this prototype — no email leaves your browser.</div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-title">Sent history</div>
+        <div class="card-sub" style="margin-bottom:16px;">Previous monthly updates sent to ${esc(c.name)}.</div>
+        ${sent.length ? `<div class="timeline">${sent.map(e => `
+          <div class="tl-item">
+            <div class="tl-dot success">${ICONS.check}</div>
+            <div class="tl-body">
+              <div class="tl-title">${esc(e.subject)}</div>
+              <div class="tl-sub">To ${esc(e.to || 'no recipient')}</div>
+            </div>
+            <div class="tl-time">${fmtDate(e.sent_at)}</div>
+          </div>
+        `).join('')}</div>` : '<div class="muted tiny">No updates sent yet.</div>'}
+      </div>
+    `;
+  }
+
+  function bindUpdate(root) {
+    const subjectInput = root.querySelector('[data-field="subject"]');
+    const bodyTextarea = root.querySelector('[data-field="body"]');
+    const parts = parseHash();
+    const cid = parts[2];
+    if (!cid) return;
+
+    const persist = () => {
+      if (!state.drafts) state.drafts = {};
+      if (!state.drafts[cid]) state.drafts[cid] = { subject: '', body: '' };
+      if (subjectInput) state.drafts[cid].subject = subjectInput.value;
+      if (bodyTextarea) state.drafts[cid].body = bodyTextarea.value;
+      commit();
+    };
+
+    if (subjectInput) subjectInput.addEventListener('input', persist);
+    if (bodyTextarea) bodyTextarea.addEventListener('input', persist);
+
+    root.querySelectorAll('[data-action="regen-draft"]').forEach(b => b.addEventListener('click', () => {
+      const c = state.clients.find(x => x.id === b.dataset.id);
+      if (!c) return;
+      const editedSubject = subjectInput && subjectInput.value.trim();
+      const editedBody = bodyTextarea && bodyTextarea.value.trim();
+      if (editedSubject || editedBody) {
+        if (!confirm('Replace your current draft with a fresh one from the latest data?')) return;
+      }
+      state.drafts[c.id] = generateDraft(c);
+      commit();
+      toast('Draft regenerated');
+      render();
+    }));
+
+    root.querySelectorAll('[data-action="copy-draft"]').forEach(b => b.addEventListener('click', () => {
+      if (!subjectInput || !bodyTextarea) return;
+      const text = `Subject: ${subjectInput.value}\n\n${bodyTextarea.value}`;
+      const done = () => toast('Copied to clipboard');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, () => toast('Copy failed'));
+      } else {
+        bodyTextarea.select();
+        try { document.execCommand('copy'); done(); } catch (e) { toast('Copy failed'); }
+      }
+    }));
+
+    root.querySelectorAll('[data-action="send-draft"]').forEach(b => b.addEventListener('click', () => {
+      const c = state.clients.find(x => x.id === b.dataset.id);
+      if (!c) return;
+      if (!c.viewer_email) { toast('Add a contact email in Settings first'); return; }
+      if (!state.sent_emails) state.sent_emails = [];
+      state.sent_emails.unshift({
+        id: 'e_' + Math.random().toString(36).slice(2, 8),
+        client_id: c.id,
+        to: c.viewer_email,
+        subject: subjectInput ? subjectInput.value : '',
+        body: bodyTextarea ? bodyTextarea.value : '',
+        sent_at: new Date().toISOString(),
+      });
+      state.audit.unshift({
+        id: 'a_' + Math.random().toString(36).slice(2, 8),
+        client_id: c.id, actor: 'admin', action: 'email_sent',
+        payload: { subject: subjectInput ? subjectInput.value : '' },
+        created_at: new Date().toISOString(),
+      });
+      if (state.drafts) delete state.drafts[c.id];
+      commit();
+      toast(`Update sent to ${c.viewer_email}`);
+      render();
+    }));
+  }
+
+  /* ---------- VIEWER: Portal (deferred — kept for future) ----------
   function viewPortal() {
     const cid = state.session.clientId;
     const c = state.clients.find(x => x.id === cid);
@@ -1128,6 +1287,7 @@
       ${raw(tabAnalytics(c))}
     `, { crumbs: h`<a href="#/portal">Your dashboard</a><span class="sep">/</span>Analytics` });
   }
+  ---------- end deferred viewer code ---------- */
 
   /* ---------- Router ---------- */
   function parseHash() {
@@ -1141,13 +1301,13 @@
 
     let html = '';
     if (parts[0] === 'login' || parts.length === 0) {
-      if (parts.length === 0 && state.session.role) {
-        location.hash = state.session.role === 'admin' ? '#/admin' : '#/portal';
+      if (parts.length === 0 && state.session.role === 'admin') {
+        location.hash = '#/admin';
         return;
       }
       html = viewLogin();
     } else if (parts[0] === 'admin') {
-      if (state.session.role !== 'admin') { location.hash = '#/portal'; return; }
+      if (state.session.role !== 'admin') { location.hash = '#/login'; return; }
       if (parts.length === 1) html = viewAdminOverview();
       else if (parts[1] === 'clients' && parts.length === 2) html = viewAdminClients();
       else if (parts[1] === 'clients' && parts[2] === 'new') html = viewNewClient();
@@ -1157,9 +1317,8 @@
       else if (parts[1] === 'settings') html = viewSettings();
       else html = viewAdminOverview();
     } else if (parts[0] === 'portal') {
-      if (state.session.role !== 'viewer') { location.hash = '#/admin'; return; }
-      if (parts[1] === 'analytics') html = viewPortalAnalytics();
-      else html = viewPortal();
+      location.hash = '#/admin';
+      return;
     } else {
       html = viewAdminOverview();
     }
@@ -1172,6 +1331,7 @@
     bindTabs(app);
     bindClientPage(app);
     bindNotesTasks(app);
+    bindUpdate(app);
     bindTableRows(app);
     bindSearch(app);
   }
