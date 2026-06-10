@@ -202,14 +202,14 @@
         <a href="#/admin/clients/${c.id}" class="card" style="display:block; text-decoration:none;">
           <div class="row between">
             <div class="row">
-              <div class="client-avatar" style="width:44px;height:44px;font-size:16px;border-radius:12px;">${c.initial}</div>
+              <div class="client-avatar" style="width:36px;height:36px;font-size:14px;border-radius:6px;">${c.initial}</div>
               <div>
                 <div class="card-title">${esc(c.name)}</div>
                 <div class="card-sub">${esc(c.url)}</div>
               </div>
             </div>
             <div style="text-align:right;">
-              <div style="font-weight:700;color:var(--forest);font-size:18px;">${c.health}</div>
+              <div style="font-weight:600;color:var(--ink);font-size:18px;">${c.health}</div>
               <div class="tiny muted">Health</div>
             </div>
           </div>
@@ -306,7 +306,7 @@
         <tr data-href="#/admin/clients/${c.id}">
           <td>
             <div class="row">
-              <div class="client-avatar" style="width:36px;height:36px;font-size:14px;border-radius:10px;">${c.initial}</div>
+              <div class="client-avatar" style="width:30px;height:30px;font-size:12px;border-radius:5px;">${c.initial}</div>
               <div>
                 <div class="cell-name">${esc(c.name)}</div>
                 <div class="cell-sub">${esc(c.url)}</div>
@@ -713,7 +713,7 @@
           <div class="url"><a href="https://${esc(c.url)}" target="_blank" rel="noreferrer">${esc(c.url)} ${raw(ICONS.external)}</a></div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:28px;font-weight:700;color:var(--forest);">${c.health}<span class="muted tiny" style="font-weight:500;"> /100</span></div>
+          <div style="font-size:24px;font-weight:600;color:var(--ink);">${c.health}<span class="muted tiny" style="font-weight:400;"> /100</span></div>
           <div class="tiny muted">SEO health</div>
         </div>
       </div>
@@ -817,7 +817,7 @@
             <div><div class="card-title">Notes</div><div class="card-sub">Free-text context. Visible to the viewer.</div></div>
           </div>
           <form data-form="new-note" style="margin-bottom:16px;">
-            <textarea name="body" placeholder="Add a note about this client…" style="width:100%; border:1px solid var(--border-strong); border-radius:8px; padding:12px; min-height:80px; font-family:inherit; font-size:14px;"></textarea>
+            <textarea name="body" placeholder="Add a note about this client…" style="width:100%; border:1px solid var(--border-strong); border-radius:4px; padding:10px 12px; min-height:80px; font-family:inherit; font-size:14px;"></textarea>
             <div class="row" style="margin-top:8px; justify-content:flex-end;">
               <button class="btn primary sm" type="submit">Post note</button>
             </div>
@@ -837,7 +837,7 @@
           </div>
           <form data-form="new-task" style="margin-bottom:8px;">
             <div class="row">
-              <input name="title" placeholder="e.g. Rewrote catering page copy" style="flex:1; border:1px solid var(--border-strong); border-radius:8px; padding:10px 12px;"/>
+              <input name="title" placeholder="e.g. Rewrote catering page copy" style="flex:1; border:1px solid var(--border-strong); border-radius:4px; padding:8px 10px; font-size:14px;"/>
               <button class="btn primary sm" type="submit">${ICONS.plus} Add</button>
             </div>
           </form>
@@ -887,7 +887,7 @@
               <div class="card-title">Daily pageviews</div>
               <div class="card-sub">Last 30 days · Fathom Analytics</div>
             </div>
-            <div class="legend"><span><span class="legend-dot" style="background:var(--forest)"></span>Pageviews</span><span><span class="legend-dot" style="background:var(--green)"></span>Uniques</span></div>
+            <div class="legend"><span><span class="legend-dot" style="background:var(--ink)"></span>Pageviews</span><span><span class="legend-dot" style="background:var(--muted-2)"></span>Uniques</span></div>
           </div>
           ${renderChart(s.days)}
         </div>
@@ -903,8 +903,8 @@
                   <span style="font-weight:500;">${esc(p.path)}</span>
                   <span class="muted tiny">${fmtNum(p.pv)}</span>
                 </div>
-                <div style="height:6px; background:var(--surface-alt); border-radius:9999px; overflow:hidden;">
-                  <div style="height:100%; width:${w}%; background:var(--green); border-radius:9999px;"></div>
+                <div style="height:6px; background:var(--surface-alt); border-radius:3px; overflow:hidden;">
+                  <div style="height:100%; width:${w}%; background:var(--ink); border-radius:3px;"></div>
                 </div>
               </div>
             `;
@@ -927,15 +927,15 @@
       <svg viewBox="0 0 ${w} ${hH}" preserveAspectRatio="none">
         <defs>
           <linearGradient id="gradPv" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stop-color="#163300" stop-opacity="0.18"/>
-            <stop offset="100%" stop-color="#163300" stop-opacity="0"/>
+            <stop offset="0%" stop-color="#37352f" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="#37352f" stop-opacity="0"/>
           </linearGradient>
         </defs>
-        ${ticks.map(t => `<line x1="${pad}" x2="${w - pad}" y1="${yScale(t)}" y2="${yScale(t)}" stroke="#e6e8e1" stroke-width="1"/>`).join('')}
-        ${ticks.map(t => `<text x="6" y="${yScale(t) + 4}" font-size="10" fill="#9aa097">${fmtNum(t)}</text>`).join('')}
+        ${ticks.map(t => `<line x1="${pad}" x2="${w - pad}" y1="${yScale(t)}" y2="${yScale(t)}" stroke="#ecebea" stroke-width="1"/>`).join('')}
+        ${ticks.map(t => `<text x="6" y="${yScale(t) + 4}" font-size="10" fill="#9b9a97">${fmtNum(t)}</text>`).join('')}
         <path d="${areaPath}" fill="url(#gradPv)"/>
-        <path d="${uvPath}" fill="none" stroke="#9fe870" stroke-width="2.5" stroke-linejoin="round"/>
-        <path d="${pvPath}" fill="none" stroke="#163300" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="${uvPath}" fill="none" stroke="#9b9a97" stroke-width="2" stroke-linejoin="round"/>
+        <path d="${pvPath}" fill="none" stroke="#37352f" stroke-width="2" stroke-linejoin="round"/>
       </svg>
     `;
   }
