@@ -71,9 +71,8 @@
   /* ---------- Layout shell ---------- */
   function shell(activeKey, body, opts = {}) {
     const navItems = [
-      { key: 'dashboard', label: 'Overview', icon: ICONS.dashboard, href: '#/admin' },
+      { key: 'recs', label: 'Recommendations', icon: ICONS.recs, href: '#/admin' },
       { key: 'clients', label: 'Clients', icon: ICONS.clients, href: '#/admin/clients' },
-      { key: 'recs', label: 'Recommendations', icon: ICONS.recs, href: '#/admin/recommendations' },
       { key: 'deploys', label: 'Deploys', icon: ICONS.deploys, href: '#/admin/deploys' },
     ];
     const settingsItems = [{ key: 'settings', label: 'Settings', icon: ICONS.settings, href: '#/admin/settings' }];
@@ -171,128 +170,6 @@
       state.session.clientId = null;
       commit();
       location.hash = '#/admin';
-    });
-  }
-
-  /* ---------- ADMIN: Overview ---------- */
-  function viewAdminOverview() {
-    const recs = state.recommendations;
-    const pending = recs.filter(r => r.status === 'pending');
-    const auto = pending.filter(r => r.type === 'auto');
-    const manual = pending.filter(r => r.type === 'manual');
-    const implementedThisWeek = state.implementations.filter(i => {
-      const d = new Date(i.applied_at);
-      return (new Date('2026-06-08') - d) / 86400000 < 7;
-    });
-
-    const kpis = [
-      { label: 'Clients', value: state.clients.length, delta: 'Steady portfolio' },
-      { label: 'Pending recs', value: pending.length, delta: `${auto.length} auto · ${manual.length} manual` },
-      { label: 'Auto-implemented · 7d', value: implementedThisWeek.length, delta: 'All checks passed', cls: 'up' },
-      { label: 'Manual outstanding', value: manual.length, delta: 'Across all clients' },
-    ];
-
-    const recentImpl = [...state.implementations].sort((a, b) => new Date(b.applied_at) - new Date(a.applied_at)).slice(0, 6);
-
-    const clientCards = state.clients.map(c => {
-      const cPending = recs.filter(r => r.client_id === c.id && r.status === 'pending');
-      const cAuto = cPending.filter(r => r.type === 'auto').length;
-      const cManual = cPending.filter(r => r.type === 'manual').length;
-      return `
-        <a href="#/admin/clients/${c.id}" class="card" style="display:block; text-decoration:none;">
-          <div class="row between">
-            <div class="row">
-              <div class="client-avatar" style="width:36px;height:36px;font-size:14px;border-radius:6px;">${c.initial}</div>
-              <div>
-                <div class="card-title">${esc(c.name)}</div>
-                <div class="card-sub">${esc(c.url)}</div>
-              </div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:600;color:var(--ink);font-size:18px;">${c.health}</div>
-              <div class="tiny muted">Health</div>
-            </div>
-          </div>
-          <hr style="margin:16px 0;">
-          <div class="row" style="gap:8px; flex-wrap:wrap;">
-            <span class="badge auto dot">${cAuto} auto pending</span>
-            <span class="badge manual dot">${cManual} manual</span>
-            <span class="badge neutral">Last sync ${fmtRel(c.last_sync)}</span>
-          </div>
-        </a>
-      `;
-    }).join('');
-
-    return shell('dashboard', h`
-      <div class="page-header">
-        <div>
-          <div class="eyebrow">Overview</div>
-          <h1>Good morning.</h1>
-          <p class="subtitle">Here's the state of the portfolio. ${pending.length} recommendations waiting on you across ${state.clients.length} client${state.clients.length === 1 ? '' : 's'}.</p>
-        </div>
-        <div class="page-actions">
-          <button class="btn ghost" data-action="resync">Pull SiteGuru now</button>
-          <a href="#/admin/clients/new" class="btn primary">${raw(ICONS.plus)} New client</a>
-        </div>
-      </div>
-
-      <div class="hero" style="margin-bottom:24px;">
-        <div>
-          <h2>${auto.length} change${auto.length === 1 ? '' : 's'} ready to ship</h2>
-          <p>Accept them and Claude Code will write the edit, open a PR, run preview checks, and merge on green. You don't have to touch the code.</p>
-        </div>
-        <div class="actions">
-          <a href="#/admin/recommendations" class="btn dark">Review queue ${raw(ICONS.arrow)}</a>
-        </div>
-      </div>
-
-      <div class="grid kpis" style="margin-bottom:24px;">
-        ${raw(kpis.map(k => `
-          <div class="kpi">
-            <div class="label">${k.label}</div>
-            <div class="value">${k.value}</div>
-            <div class="delta ${k.cls || ''}">${k.delta}</div>
-          </div>`).join(''))}
-      </div>
-
-      <div class="grid split-7-5">
-        <div class="card">
-          <div class="section-head">
-            <h3>Clients</h3>
-            <a href="#/admin/clients" class="tiny muted">View all →</a>
-          </div>
-          <div class="grid cols-2" style="gap:12px;">
-            ${raw(clientCards)}
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="section-head">
-            <h3>Recent deploys</h3>
-            <span class="count">last 7 days</span>
-          </div>
-          ${raw(recentImpl.length ? recentImpl.map(i => {
-            const r = recs.find(x => x.id === i.recommendation_id);
-            const c = state.clients.find(x => x.id === i.client_id);
-            return `
-              <div class="tl-item">
-                <div class="tl-dot success">${ICONS.check}</div>
-                <div class="tl-body">
-                  <div class="tl-title">${esc(r ? r.title : 'Recommendation')}</div>
-                  <div class="tl-sub">${esc(c ? c.name : '')} · ${esc(i.commit_sha.slice(0, 7))}</div>
-                  <div class="tl-links">
-                    <a href="${esc(i.pr_url)}" target="_blank" rel="noreferrer">PR ${ICONS.external}</a>
-                    <a href="${esc(i.deploy_url)}" target="_blank" rel="noreferrer">Deploy ${ICONS.external}</a>
-                  </div>
-                </div>
-                <div class="tl-time">${fmtRel(i.applied_at)}</div>
-              </div>
-            `;
-          }).join('') : '<div class="empty"><h3>No deploys yet</h3><p>Accepted auto-recs will show up here.</p></div>')}
-        </div>
-      </div>
-    `, {
-      crumbs: h`<a href="#/admin">Dashboard</a>`,
     });
   }
 
@@ -442,37 +319,93 @@
     });
   }
 
-  /* ---------- ADMIN: All recommendations queue ---------- */
+  /* ---------- ADMIN: Recommendations (home page) ---------- */
   function viewAdminRecs() {
-    const recs = state.recommendations.filter(r => r.status === 'pending');
-    const auto = recs.filter(r => r.type === 'auto');
-    const manual = recs.filter(r => r.type === 'manual');
+    const recs = state.recommendations;
+    const pending = recs.filter(r => r.status === 'pending' || r.status === 'accepted');
+    const statusOrder = { pending: 0, accepted: 0, failed: 1, implemented: 2, declined: 3 };
+    const sorted = [...recs].sort((a, b) => {
+      const so = (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
+      if (so !== 0) return so;
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    const rows = sorted.map(r => {
+      const c = state.clients.find(x => x.id === r.client_id) || {};
+      return recRow(r, c);
+    }).join('');
+
+    const clientCount = new Set(pending.map(r => r.client_id)).size;
+
     return shell('recs', h`
       <div class="page-header">
         <div>
           <div class="eyebrow">Recommendations</div>
-          <h1>Review queue</h1>
-          <p class="subtitle">${recs.length} pending across ${new Set(recs.map(r=>r.client_id)).size} client${new Set(recs.map(r=>r.client_id)).size === 1 ? '' : 's'}. Accept the auto changes — the manual ones need your judgement.</p>
+          <h1>Recommendations</h1>
+          <p class="subtitle">${pending.length} pending across ${clientCount} client${clientCount === 1 ? '' : 's'}. Work through them with Claude Code, then mark done.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn ghost sm" data-action="resync">Pull SiteGuru now</button>
         </div>
       </div>
 
-      <div class="grid cols-2">
-        <div>
-          <div class="section-head">
-            <h3>Auto-implementable</h3>
-            <span class="count">${auto.length}</span>
-          </div>
-          <div class="stack">${raw(auto.map(r => recCard(r, true)).join('') || emptyHtml('All caught up', 'No auto recommendations waiting.'))}</div>
-        </div>
-        <div>
-          <div class="section-head">
-            <h3>Manual</h3>
-            <span class="count">${manual.length}</span>
-          </div>
-          <div class="stack">${raw(manual.map(r => recCard(r, true)).join('') || emptyHtml('Nothing to action', 'No manual recommendations pending.'))}</div>
-        </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Recommendation</th>
+              <th>Client</th>
+              <th>Status</th>
+              <th>Added</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>${raw(rows || '<tr><td colspan="5" style="text-align:center; padding:48px; color:var(--muted);">No recommendations yet.</td></tr>')}</tbody>
+        </table>
       </div>
-    `, { crumbs: h`<a href="#/admin">Dashboard</a><span class="sep">/</span>Recommendations` });
+    `, { crumbs: h`Recommendations` });
+  }
+
+  function recRow(r, c) {
+    const isPending = r.status === 'pending' || r.status === 'accepted';
+    const isImpl = r.status === 'implemented';
+    const isDismissed = r.status === 'declined' || r.status === 'failed';
+
+    let statusBadge = '<span class="badge neutral dot">Pending</span>';
+    if (isImpl) statusBadge = '<span class="badge success dot">Done</span>';
+    if (isDismissed) statusBadge = '<span class="badge neutral">Dismissed</span>';
+
+    let actions = '';
+    if (isPending) {
+      actions = `
+        <button class="btn primary sm" data-action="done" data-id="${r.id}">${ICONS.check} Mark done</button>
+        <button class="btn ghost sm" data-action="dismiss" data-id="${r.id}">Dismiss</button>
+      `;
+    } else {
+      actions = `<button class="btn ghost sm" data-action="reopen" data-id="${r.id}">Reopen</button>`;
+    }
+
+    const descShort = (r.description || '').length > 110
+      ? r.description.slice(0, 110) + '…'
+      : (r.description || '');
+
+    return `
+      <tr data-href="#/admin/clients/${r.client_id}/recs">
+        <td>
+          <div class="cell-name">${esc(r.title)}</div>
+          <div class="cell-sub">${esc(descShort)}</div>
+        </td>
+        <td>
+          <div class="row" style="gap:8px;">
+            <div class="client-avatar" style="width:24px;height:24px;font-size:11px;border-radius:4px;">${esc(c.initial || '?')}</div>
+            <span style="font-weight:500;">${esc(c.name || 'Unknown')}</span>
+          </div>
+        </td>
+        <td>${statusBadge}</td>
+        <td><span class="muted tiny">${fmtRel(r.created_at)}</span></td>
+        <td class="cell-right"><div style="display:inline-flex; gap:4px; justify-content:flex-end;">${actions}</div></td>
+      </tr>
+    `;
   }
 
   function emptyHtml(title, sub) {
@@ -481,48 +414,36 @@
 
   function recCard(r, showClient) {
     const c = state.clients.find(x => x.id === r.client_id);
-    const isPending = r.status === 'pending';
-    const isAccepted = r.status === 'accepted';
+    const isPending = r.status === 'pending' || r.status === 'accepted';
     const isImpl = r.status === 'implemented';
-    const isDecl = r.status === 'declined';
-    const isFailed = r.status === 'failed';
-    const badge = r.type === 'auto' ? '<span class="badge auto dot">Auto</span>' : '<span class="badge manual dot">Manual</span>';
-    let statusBadge = '';
-    if (isAccepted) statusBadge = '<span class="badge info dot">Queued · running</span>';
-    if (isImpl) statusBadge = '<span class="badge success dot">Implemented</span>';
-    if (isDecl) statusBadge = '<span class="badge neutral">Declined</span>';
-    if (isFailed) statusBadge = '<span class="badge danger dot">Failed checks</span>';
+    const isDismissed = r.status === 'declined' || r.status === 'failed';
+
+    let statusBadge = '<span class="badge neutral dot">Pending</span>';
+    if (isImpl) statusBadge = '<span class="badge success dot">Done</span>';
+    else if (isDismissed) statusBadge = '<span class="badge neutral">Dismissed</span>';
 
     let actions = '';
-    if (isPending && r.type === 'auto') {
+    if (isPending) {
       actions = `
-        <button class="btn primary sm" data-action="accept" data-id="${r.id}">${ICONS.check} Accept</button>
-        <button class="btn ghost sm" data-action="decline" data-id="${r.id}">Decline</button>
+        <button class="btn primary sm" data-action="done" data-id="${r.id}">${ICONS.check} Mark done</button>
+        <button class="btn ghost sm" data-action="dismiss" data-id="${r.id}">Dismiss</button>
       `;
-    } else if (isPending && r.type === 'manual') {
-      actions = `
-        <button class="btn ghost sm" data-action="logged" data-id="${r.id}">Mark as logged</button>
-        <button class="btn ghost sm" data-action="decline" data-id="${r.id}">Dismiss</button>
-      `;
-    } else if (isAccepted) {
-      actions = `<span class="muted tiny">PR in flight…</span>`;
-    } else if (isImpl) {
-      actions = `<button class="btn ghost sm" data-action="revert" data-id="${r.id}">${ICONS.revert} Revert</button>`;
+    } else {
+      actions = `<button class="btn ghost sm" data-action="reopen" data-id="${r.id}">${ICONS.revert} Reopen</button>`;
     }
 
     const clientChip = showClient && c ? `<a href="#/admin/clients/${c.id}" class="badge neutral">${esc(c.name)}</a>` : '';
+    const categoryLabel = (r.category || '').replace(/_/g, ' ');
 
     return `
-      <div class="rec ${isImpl ? 'is-implemented' : ''} ${isDecl ? 'is-declined' : ''}">
+      <div class="rec ${isImpl ? 'is-implemented' : ''} ${isDismissed ? 'is-declined' : ''}">
         <div>
           <div class="title-row">
-            ${badge}${statusBadge}${clientChip}
+            ${statusBadge}${clientChip}${categoryLabel ? `<span class="badge neutral">${esc(categoryLabel)}</span>` : ''}
           </div>
           <div class="title">${esc(r.title)}</div>
           <div class="desc">${esc(r.description)}</div>
           <div class="meta">
-            <span>Source: SiteGuru</span>
-            <span>Category: ${esc(r.category)}</span>
             <span>${fmtRel(r.created_at)}</span>
           </div>
         </div>
@@ -532,74 +453,56 @@
   }
 
   function bindRecActions(root) {
-    root.querySelectorAll('[data-action="accept"]').forEach(b => b.addEventListener('click', (e) => {
+    const audit = (client_id, action, payload) => state.audit.unshift({
+      id: 'a_' + Math.random().toString(36).slice(2, 8),
+      client_id, actor: 'admin', action, payload,
+      created_at: new Date().toISOString(),
+    });
+
+    root.querySelectorAll('[data-action="done"]').forEach(b => b.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = b.dataset.id;
-      const r = state.recommendations.find(x => x.id === id);
+      const r = state.recommendations.find(x => x.id === b.dataset.id);
       if (!r) return;
-      r.status = 'accepted';
-      state.audit.unshift({ id: 'a_' + Math.random().toString(36).slice(2, 8), client_id: r.client_id, actor: 'admin', action: 'accepted', payload: { recommendation: r.id, title: r.title }, created_at: new Date().toISOString() });
-      state.audit.unshift({ id: 'a_' + Math.random().toString(36).slice(2, 8), client_id: r.client_id, actor: 'system', action: 'workflow_dispatched', payload: { recommendation: r.id }, created_at: new Date().toISOString() });
+      r.status = 'implemented';
+      state.implementations.unshift({
+        id: 'i_' + Math.random().toString(36).slice(2, 8),
+        recommendation_id: r.id,
+        client_id: r.client_id,
+        status: 'manual',
+        commit_sha: '',
+        pr_url: '',
+        deploy_url: '',
+        applied_at: new Date().toISOString(),
+      });
+      audit(r.client_id, 'completed', { recommendation: r.id, title: r.title });
       commit();
-      toast('Accepted — dispatching workflow to GitHub…');
-      // Simulate async PR + merge after a beat
-      setTimeout(() => simulateMerge(r.id), 1800);
+      toast('Marked done');
       render();
     }));
-    root.querySelectorAll('[data-action="decline"]').forEach(b => b.addEventListener('click', (e) => {
+
+    root.querySelectorAll('[data-action="dismiss"]').forEach(b => b.addEventListener('click', (e) => {
       e.stopPropagation();
       const r = state.recommendations.find(x => x.id === b.dataset.id);
       if (!r) return;
       r.status = 'declined';
-      state.audit.unshift({ id: 'a_' + Math.random().toString(36).slice(2, 8), client_id: r.client_id, actor: 'admin', action: 'declined', payload: { recommendation: r.id, title: r.title }, created_at: new Date().toISOString() });
+      audit(r.client_id, 'dismissed', { recommendation: r.id, title: r.title });
       commit();
-      toast('Declined');
+      toast('Dismissed');
       render();
     }));
-    root.querySelectorAll('[data-action="logged"]').forEach(b => b.addEventListener('click', (e) => {
+
+    root.querySelectorAll('[data-action="reopen"]').forEach(b => b.addEventListener('click', (e) => {
       e.stopPropagation();
-      const r = state.recommendations.find(x => x.id === b.dataset.id);
-      if (!r) return;
-      state.tasks.unshift({ id: 't_' + Math.random().toString(36).slice(2, 8), client_id: r.client_id, title: r.title, status: 'open', completed_at: null });
-      r.status = 'declined';
-      commit();
-      toast('Added to manual tasks');
-      render();
-    }));
-    root.querySelectorAll('[data-action="revert"]').forEach(b => b.addEventListener('click', (e) => {
-      e.stopPropagation();
+      if (b.tagName === 'A') e.preventDefault();
       const r = state.recommendations.find(x => x.id === b.dataset.id);
       if (!r) return;
       r.status = 'pending';
       state.implementations = state.implementations.filter(i => i.recommendation_id !== r.id);
-      state.audit.unshift({ id: 'a_' + Math.random().toString(36).slice(2, 8), client_id: r.client_id, actor: 'admin', action: 'reverted', payload: { recommendation: r.id }, created_at: new Date().toISOString() });
+      audit(r.client_id, 'reopened', { recommendation: r.id });
       commit();
-      toast('Revert PR opened');
+      toast('Reopened');
       render();
     }));
-  }
-
-  function simulateMerge(recId) {
-    const r = state.recommendations.find(x => x.id === recId);
-    if (!r || r.status !== 'accepted') return;
-    r.status = 'implemented';
-    const sha = Math.random().toString(16).slice(2, 9);
-    const prNum = 100 + Math.floor(Math.random() * 400);
-    const c = state.clients.find(x => x.id === r.client_id);
-    state.implementations.unshift({
-      id: 'i_' + Math.random().toString(36).slice(2, 8),
-      recommendation_id: r.id,
-      client_id: r.client_id,
-      status: 'merged',
-      commit_sha: sha,
-      pr_url: `https://github.com/${c?.github_repo || 'tango/site'}/pull/${prNum}`,
-      deploy_url: `https://${(c?.url || 'site').replace(/\./g,'-')}-git-seo-${r.id}.vercel.app`,
-      applied_at: new Date().toISOString(),
-    });
-    state.audit.unshift({ id: 'a_' + Math.random().toString(36).slice(2, 8), client_id: r.client_id, actor: 'system', action: 'pr_merged', payload: { recommendation: r.id }, created_at: new Date().toISOString() });
-    commit();
-    toast('PR merged · deploy live');
-    render();
   }
 
   /* ---------- ADMIN: Deploys (audit) ---------- */
@@ -610,7 +513,7 @@
         <div>
           <div class="eyebrow">Deploys</div>
           <h1>Implementation history</h1>
-          <p class="subtitle">Every change the dashboard has shipped, across the whole portfolio. One row = one merged PR = one production deploy.</p>
+          <p class="subtitle">Every recommendation marked done, across the whole portfolio.</p>
         </div>
       </div>
       <div class="card">
@@ -623,19 +526,32 @@
                 <div class="tl-dot success">${ICONS.check}</div>
                 <div class="tl-body">
                   <div class="tl-title">${esc(r?.title || 'Implementation')}</div>
-                  <div class="tl-sub">${esc(c?.name || '')} · commit ${esc(i.commit_sha.slice(0,7))} · ${esc(i.status)}</div>
-                  <div class="tl-links">
-                    <a href="${esc(i.pr_url)}" target="_blank" rel="noreferrer">View PR ${ICONS.external}</a>
-                    <a href="${esc(i.deploy_url)}" target="_blank" rel="noreferrer">View deploy ${ICONS.external}</a>
-                  </div>
+                  <div class="tl-sub">${esc(c?.name || '')}${implMeta(i)}</div>
+                  ${implLinks(i)}
                 </div>
                 <div class="tl-time">${fmtDate(i.applied_at)}</div>
               </div>
             `;
-          }).join('') : emptyHtml('No deploys yet', 'Accept an auto-recommendation to ship your first change.'))}
+          }).join('') : emptyHtml('Nothing shipped yet', 'Mark a recommendation done to see it here.'))}
         </div>
       </div>
-    `, { crumbs: h`<a href="#/admin">Dashboard</a><span class="sep">/</span>Deploys` });
+    `, { crumbs: h`<a href="#/admin">Recommendations</a><span class="sep">/</span>Deploys` });
+  }
+
+  function implMeta(i) {
+    const parts = [];
+    if (i.commit_sha) parts.push(`commit ${i.commit_sha.slice(0,7)}`);
+    if (i.status && i.status !== 'manual') parts.push(i.status);
+    if (i.status === 'manual') parts.push('manual fix');
+    return parts.length ? ' · ' + parts.map(esc).join(' · ') : '';
+  }
+
+  function implLinks(i, extraLinks) {
+    const links = [];
+    if (i.pr_url) links.push(`<a href="${esc(i.pr_url)}" target="_blank" rel="noreferrer">View PR ${ICONS.external}</a>`);
+    if (i.deploy_url) links.push(`<a href="${esc(i.deploy_url)}" target="_blank" rel="noreferrer">View deploy ${ICONS.external}</a>`);
+    if (extraLinks) links.push(...extraLinks);
+    return links.length ? `<div class="tl-links">${links.join('')}</div>` : '';
   }
 
   /* ---------- ADMIN: Settings ---------- */
@@ -733,21 +649,11 @@
 
   function tabRecs(c, all) {
     const pending = all.filter(r => r.status === 'pending' || r.status === 'accepted');
-    const auto = pending.filter(r => r.type === 'auto');
-    const manual = pending.filter(r => r.type === 'manual');
     const handled = all.filter(r => r.status === 'implemented' || r.status === 'declined' || r.status === 'failed');
 
     return `
-      <div class="grid cols-2">
-        <div>
-          <div class="section-head"><h3>Auto-implementable</h3><span class="count">${auto.length}</span></div>
-          <div class="stack">${auto.map(r => recCard(r, false)).join('') || emptyHtml('Caught up', 'No auto recommendations waiting.')}</div>
-        </div>
-        <div>
-          <div class="section-head"><h3>Manual</h3><span class="count">${manual.length}</span></div>
-          <div class="stack">${manual.map(r => recCard(r, false)).join('') || emptyHtml('Nothing to action', 'No manual recommendations pending.')}</div>
-        </div>
-      </div>
+      <div class="section-head"><h3>Pending</h3><span class="count">${pending.length}</span></div>
+      <div class="stack">${pending.length ? pending.map(r => recCard(r, false)).join('') : emptyHtml('All caught up', 'No pending recommendations.')}</div>
 
       ${handled.length ? `
         <div style="margin-top:24px;">
@@ -764,35 +670,32 @@
     return `
       <div class="grid split-7-5">
         <div class="card">
-          <div class="card-title">Deploys</div>
-          <div class="card-sub" style="margin-bottom:16px;">Every merged PR triggered from this client's recommendations.</div>
+          <div class="card-title">Implementations</div>
+          <div class="card-sub" style="margin-bottom:16px;">Every recommendation marked done for this client.</div>
           <div class="timeline">
             ${impls.length ? impls.map(i => {
               const r = state.recommendations.find(x => x.id === i.recommendation_id);
+              const reopenLink = r ? [`<a href="#" data-action="reopen" data-id="${r.id}">Reopen</a>`] : [];
               return `
                 <div class="tl-item">
                   <div class="tl-dot success">${ICONS.check}</div>
                   <div class="tl-body">
                     <div class="tl-title">${esc(r?.title || 'Implementation')}</div>
-                    <div class="tl-sub">commit ${esc(i.commit_sha.slice(0,7))} · ${esc(i.status)}</div>
-                    <div class="tl-links">
-                      <a href="${esc(i.pr_url)}" target="_blank" rel="noreferrer">PR ${ICONS.external}</a>
-                      <a href="${esc(i.deploy_url)}" target="_blank" rel="noreferrer">Deploy ${ICONS.external}</a>
-                      ${r ? `<a href="#" data-action="revert" data-id="${r.id}">Revert</a>` : ''}
-                    </div>
+                    <div class="tl-sub">${esc(i.status === 'manual' ? 'Manual fix' : 'Shipped')}${i.commit_sha ? ` · commit ${esc(i.commit_sha.slice(0,7))}` : ''}</div>
+                    ${implLinks(i, reopenLink)}
                   </div>
                   <div class="tl-time">${fmtDate(i.applied_at)}</div>
                 </div>
               `;
-            }).join('') : emptyHtml('No deploys yet', 'Accept an auto-recommendation to ship one.')}
+            }).join('') : emptyHtml('Nothing shipped yet', 'Mark a recommendation done to see it here.')}
           </div>
         </div>
         <div class="card">
           <div class="card-title">Audit log</div>
-          <div class="card-sub" style="margin-bottom:16px;">Every accept, decline, dispatch, merge and revert.</div>
+          <div class="card-sub" style="margin-bottom:16px;">Every action taken on this client.</div>
           ${audit.length ? audit.map(a => `
             <div class="tl-item">
-              <div class="tl-dot ${a.action === 'pr_merged' ? 'success' : a.action === 'declined' ? 'warn' : ''}">${a.actor === 'system' ? ICONS.system : ICONS.admin}</div>
+              <div class="tl-dot ${a.action === 'completed' || a.action === 'pr_merged' ? 'success' : a.action === 'dismissed' || a.action === 'declined' ? 'warn' : ''}">${a.actor === 'system' ? ICONS.system : ICONS.admin}</div>
               <div class="tl-body">
                 <div class="tl-title">${esc(a.action.replace(/_/g, ' '))}</div>
                 <div class="tl-sub">${esc(a.actor)} · ${esc(a.payload?.title || a.payload?.recommendation || '')}</div>
@@ -991,7 +894,7 @@
       .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
 
     const pendingManual = state.recommendations
-      .filter(r => r.client_id === client.id && r.type === 'manual' && r.status === 'pending');
+      .filter(r => r.client_id === client.id && (r.status === 'pending' || r.status === 'accepted'));
 
     const shortDate = (iso) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     const implLines = impls.map(i => {
@@ -1308,19 +1211,19 @@
       html = viewLogin();
     } else if (parts[0] === 'admin') {
       if (state.session.role !== 'admin') { location.hash = '#/login'; return; }
-      if (parts.length === 1) html = viewAdminOverview();
+      if (parts.length === 1) html = viewAdminRecs();
       else if (parts[1] === 'clients' && parts.length === 2) html = viewAdminClients();
       else if (parts[1] === 'clients' && parts[2] === 'new') html = viewNewClient();
       else if (parts[1] === 'clients' && parts[2]) html = viewClient(parts[2], parts[3]);
       else if (parts[1] === 'recommendations') html = viewAdminRecs();
       else if (parts[1] === 'deploys') html = viewDeploys();
       else if (parts[1] === 'settings') html = viewSettings();
-      else html = viewAdminOverview();
+      else html = viewAdminRecs();
     } else if (parts[0] === 'portal') {
       location.hash = '#/admin';
       return;
     } else {
-      html = viewAdminOverview();
+      html = viewAdminRecs();
     }
 
     app.innerHTML = html;
@@ -1378,7 +1281,7 @@
 
   function bindClientPage(root) {
     // (re-binds revert links inside impl tab — handled by bindRecActions, but those are <a>, intercept default)
-    root.querySelectorAll('a[data-action="revert"]').forEach(a => a.addEventListener('click', (e) => { e.preventDefault(); }));
+    root.querySelectorAll('a[data-action="reopen"]').forEach(a => a.addEventListener('click', (e) => { e.preventDefault(); }));
   }
 
   function bindNotesTasks(root) {
