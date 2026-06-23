@@ -543,6 +543,26 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   text-align: right;
 }
 
+/* ---------- Health score bar ---------- */
+.health-bar {
+  height: 6px;
+  background: var(--surface-alt);
+  border-radius: 3px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+}
+.health-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 200ms ease;
+}
+.health-bar-fill.health-poor { background: var(--danger); }
+.health-bar-fill.health-mid  { background: var(--warn); }
+.health-bar-fill.health-good { background: var(--success); }
+.health-bar.lg { height: 8px; border-radius: 4px; }
+.health-bar.lg .health-bar-fill { border-radius: 4px; }
+
 /* Icon font (Remix Icon) */
 .ico {
   display: inline-block;

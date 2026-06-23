@@ -48,6 +48,19 @@
 
   function commit() { window.DB.save(state); }
 
+  function healthClass(score) {
+    if (score < 60) return 'health-poor';
+    if (score < 80) return 'health-mid';
+    return 'health-good';
+  }
+  function healthBar(score, opts = {}) {
+    const cls = healthClass(score);
+    const pct = Math.max(0, Math.min(100, score));
+    const width = opts.width || 80;
+    const size = opts.lg ? ' lg' : '';
+    return `<div class="health-bar${size}" style="width:${width}px;"><div class="health-bar-fill ${cls}" style="width:${pct}%;"></div></div>`;
+  }
+
   /* ---------- Icons (Remix Icon — https://remixicon.com) ---------- */
   const ICONS = {
     dashboard: '<i class="ri-dashboard-line ico"></i>',
@@ -190,7 +203,7 @@
               </div>
             </div>
           </td>
-          <td><span class="badge neutral">${c.health} health</span></td>
+          <td><div class="row" style="gap:8px;">${healthBar(c.health, { width: 80 })}<span class="muted tiny">${c.health}</span></div></td>
           <td>${cPending} pending</td>
           <td>${cImpl} merged</td>
           <td>${fmtRel(c.last_sync)}</td>
@@ -636,9 +649,10 @@
           <h1>${esc(c.name)}</h1>
           <div class="url"><a href="https://${esc(c.url)}" target="_blank" rel="noreferrer">${esc(c.url)} ${raw(ICONS.external)}</a></div>
         </div>
-        <div style="text-align:right;">
-          <div style="font-size:24px;font-weight:600;color:var(--ink);">${c.health}<span class="muted tiny" style="font-weight:400;"> /100</span></div>
-          <div class="tiny muted">SEO health</div>
+        <div style="text-align:right; min-width:180px;">
+          <div class="tiny muted" style="margin-bottom:4px;">SEO health</div>
+          <div style="font-size:24px;font-weight:600;color:var(--ink); margin-bottom:8px;">${c.health}<span class="muted tiny" style="font-weight:400;"> /100</span></div>
+          ${raw(healthBar(c.health, { width: 160, lg: true }))}
         </div>
       </div>
 
