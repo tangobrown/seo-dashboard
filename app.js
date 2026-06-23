@@ -71,8 +71,7 @@
   /* ---------- Layout shell ---------- */
   function shell(activeKey, body, opts = {}) {
     const navItems = [
-      { key: 'recs', label: 'Recommendations', icon: ICONS.recs, href: '#/admin' },
-      { key: 'clients', label: 'Clients', icon: ICONS.clients, href: '#/admin/clients' },
+      { key: 'clients', label: 'Clients', icon: ICONS.clients, href: '#/admin' },
       { key: 'deploys', label: 'Deploys', icon: ICONS.deploys, href: '#/admin/deploys' },
     ];
     const settingsItems = [{ key: 'settings', label: 'Settings', icon: ICONS.settings, href: '#/admin/settings' }];
@@ -173,11 +172,12 @@
     });
   }
 
-  /* ---------- ADMIN: Clients table ---------- */
+  /* ---------- ADMIN: Clients table (home page) ---------- */
   function viewAdminClients() {
+    const totalPending = state.recommendations.filter(r => r.status === 'pending' || r.status === 'accepted').length;
     const rows = state.clients.map(c => {
       const cRecs = state.recommendations.filter(r => r.client_id === c.id);
-      const cPending = cRecs.filter(r => r.status === 'pending').length;
+      const cPending = cRecs.filter(r => r.status === 'pending' || r.status === 'accepted').length;
       const cImpl = state.implementations.filter(i => i.client_id === c.id).length;
       return `
         <tr data-href="#/admin/clients/${c.id}">
@@ -203,8 +203,8 @@
       <div class="page-header">
         <div>
           <div class="eyebrow">Clients</div>
-          <h1>All clients</h1>
-          <p class="subtitle">Every site you manage. Click through to review its recommendations and deploys.</p>
+          <h1>Clients</h1>
+          <p class="subtitle">${totalPending} pending task${totalPending === 1 ? '' : 's'} across ${state.clients.length} client${state.clients.length === 1 ? '' : 's'}.</p>
         </div>
         <div class="page-actions">
           <a href="#/admin/clients/new" class="btn primary">${raw(ICONS.plus)} New client</a>
@@ -231,7 +231,7 @@
           <tbody>${raw(rows)}</tbody>
         </table>
       </div>
-    `, { crumbs: h`<a href="#/admin">Dashboard</a><span class="sep">/</span>Clients` });
+    `, { crumbs: h`Clients` });
   }
 
   /* ---------- ADMIN: New client ---------- */
@@ -241,7 +241,7 @@
         <div>
           <div class="eyebrow">Clients</div>
           <h1>Add a new client</h1>
-          <p class="subtitle">All you need are the four IDs that connect the dashboard to their site, plus the contact email for the monthly update.</p>
+          <p class="subtitle">Just the wiring here — IDs and the contact email. You'll fill in the client brief (business, voice, keywords, competitors) on the client page once it's created.</p>
         </div>
       </div>
 
@@ -289,7 +289,7 @@
           <a href="#/admin/clients" class="btn ghost">Cancel</a>
         </div>
       </form>
-    `, { crumbs: h`<a href="#/admin">Dashboard</a><span class="sep">/</span><a href="#/admin/clients">Clients</a><span class="sep">/</span>New` });
+    `, { crumbs: h`<a href="#/admin">Clients</a><span class="sep">/</span>New` });
   }
 
   function bindNewClient(root) {
@@ -312,10 +312,17 @@
         viewer_email: (fd.get('viewer_email') || '').toString().trim(),
         health: 70,
         last_sync: new Date().toISOString(),
+        brief: {
+          industry: '', products: '', audience: '',
+          voice_tone: '', voice_dos: '', voice_donts: '',
+          markets: '', language: '',
+          priority_keywords: '', competitors: '',
+          goals: '', constraints: '',
+        },
       });
       commit();
       toast(`Created ${name}`);
-      location.hash = `#/admin/clients/${id}`;
+      location.hash = `#/admin/clients/${id}/brief`;
     });
   }
 
@@ -535,7 +542,7 @@
           }).join('') : emptyHtml('Nothing shipped yet', 'Mark a recommendation done to see it here.'))}
         </div>
       </div>
-    `, { crumbs: h`<a href="#/admin">Recommendations</a><span class="sep">/</span>Deploys` });
+    `, { crumbs: h`<a href="#/admin">Clients</a><span class="sep">/</span>Deploys` });
   }
 
   function implMeta(i) {
@@ -598,7 +605,7 @@
         <div class="card-sub" style="margin-bottom:12px;">Reset all local data to the seed state.</div>
         <button class="btn ghost" data-action="reset-data">Reset demo data</button>
       </div>
-    `, { crumbs: h`<a href="#/admin">Dashboard</a><span class="sep">/</span>Settings` });
+    `, { crumbs: h`<a href="#/admin">Clients</a><span class="sep">/</span>Settings` });
   }
 
   /* ---------- ADMIN: Client detail ---------- */
@@ -609,11 +616,12 @@
     const cRecs = state.recommendations.filter(r => r.client_id === c.id);
     const tab = subroute || 'recs';
 
-    const tabs = ['recs', 'implementations', 'notes', 'update', 'analytics', 'settings'];
-    const tabLabels = { recs: 'Recommendations', implementations: 'Implementations', notes: 'Notes & tasks', update: 'Client update', analytics: 'Analytics', settings: 'Settings' };
+    const tabs = ['recs', 'implementations', 'notes', 'update', 'analytics', 'brief', 'settings'];
+    const tabLabels = { recs: 'Recommendations', implementations: 'Implementations', notes: 'Notes & tasks', update: 'Client update', analytics: 'Analytics', brief: 'Brief', settings: 'Settings' };
 
     let body = '';
-    if (tab === 'recs') body = tabRecs(c, cRecs);
+    if (tab === 'brief') body = tabBrief(c);
+    else if (tab === 'recs') body = tabRecs(c, cRecs);
     else if (tab === 'implementations') body = tabImpls(c);
     else if (tab === 'notes') body = tabNotes(c);
     else if (tab === 'update') body = tabUpdate(c);
@@ -640,7 +648,7 @@
 
       ${raw(body)}
     `, {
-      crumbs: h`<a href="#/admin">Dashboard</a><span class="sep">/</span><a href="#/admin/clients">Clients</a><span class="sep">/</span>${c.name}`,
+      crumbs: h`<a href="#/admin">Clients</a><span class="sep">/</span>${c.name}`,
       topbarRight: h`
         <button class="btn ghost sm" data-action="resync-client" data-id="${c.id}">Pull SiteGuru</button>
       `,
@@ -869,6 +877,187 @@
         <button class="btn danger" data-action="remove-client" data-id="${c.id}">Remove ${esc(c.name)}</button>
       </div>
     `;
+  }
+
+  /* ---------- ADMIN: Client brief ---------- */
+  function tabBrief(c) {
+    const b = c.brief || {};
+    const isEmpty = !Object.values(b).some(v => (v || '').trim().length > 0);
+
+    const ta = (key, rows, placeholder, hint) => `
+      <div class="field">
+        <label>${esc(briefFieldLabels[key] || key)}</label>
+        <textarea data-brief-field="${key}" rows="${rows}" placeholder="${esc(placeholder)}">${esc(b[key] || '')}</textarea>
+        ${hint ? `<div class="help">${esc(hint)}</div>` : ''}
+      </div>
+    `;
+    const ti = (key, placeholder, hint) => `
+      <div class="field">
+        <label>${esc(briefFieldLabels[key] || key)}</label>
+        <input data-brief-field="${key}" value="${esc(b[key] || '')}" placeholder="${esc(placeholder)}" />
+        ${hint ? `<div class="help">${esc(hint)}</div>` : ''}
+      </div>
+    `;
+
+    return `
+      ${isEmpty ? `
+        <div class="hero" style="margin-bottom:16px;">
+          <div>
+            <h2>Tell Claude who this client is</h2>
+            <p>Anything you fill in here is read by Claude Code on every SEO change. Export as CLAUDE.md and drop it into the client's repo so it's in scope automatically.</p>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="stack" style="gap:12px;">
+        <div class="card">
+          <div class="card-title">Business</div>
+          <div class="card-sub" style="margin-bottom:16px;">Who they are and what they sell.</div>
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            ${ti('industry', 'e.g. Independent bakery')}
+            ${ta('products', 3, 'What they sell, how they make money. Be specific.', '')}
+            ${ta('audience', 3, "Their ideal customer. Demographics, what they care about, where they hang out.", '')}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Voice</div>
+          <div class="card-sub" style="margin-bottom:16px;">How Claude should write when generating or editing copy on this site.</div>
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            ${ta('voice_tone', 2, 'e.g. Warm, hands-on, knowledgeable without being precious.', '')}
+            <div class="field-row">
+              ${ta('voice_dos', 5, 'One per line', 'One per line.')}
+              ${ta('voice_donts', 5, 'One per line', 'One per line.')}
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Geography</div>
+          <div class="card-sub" style="margin-bottom:16px;">Where they want to rank, and what language they're in.</div>
+          <div class="field-row">
+            ${ti('markets', 'e.g. UK — focus on north-east London')}
+            ${ti('language', 'e.g. British English')}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Strategy</div>
+          <div class="card-sub" style="margin-bottom:16px;">Target keywords, named competitors, what success looks like. Keyword and competitor research integrations come next — for now, capture what you know.</div>
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            ${ta('priority_keywords', 6, 'One keyword/phrase per line.', 'One per line — the 5-10 you care about most.')}
+            ${ta('competitors', 5, 'domain.com — optional note about why\nanother.com — another note', 'One per line. Format: domain — optional note.')}
+            ${ta('goals', 3, 'e.g. Rank top-3 for "X" in 6 months. Drive footfall to the Hackney shop.', '')}
+            ${ta('constraints', 3, 'Anything Claude should know — rebrands, legal language, seasonal cycles, things to avoid.', '')}
+          </div>
+        </div>
+
+        <div class="row between" style="padding:4px 4px 0;">
+          <span class="muted tiny">Changes save automatically.</span>
+          <div class="row" style="gap:6px;">
+            <button class="btn ghost sm" data-action="copy-brief" data-id="${c.id}">Copy as Markdown</button>
+            <button class="btn primary sm" data-action="download-brief" data-id="${c.id}">${ICONS.external} Download CLAUDE.md</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const briefFieldLabels = {
+    industry: 'Industry',
+    products: 'What they do / sell',
+    audience: 'Target customer',
+    voice_tone: 'Tone',
+    voice_dos: "Do's",
+    voice_donts: "Don'ts",
+    markets: 'Markets',
+    language: 'Primary language',
+    priority_keywords: 'Priority keywords',
+    competitors: 'Competitors',
+    goals: 'Goals',
+    constraints: 'Constraints & notes',
+  };
+
+  function briefToMarkdown(c) {
+    const b = c.brief || {};
+    const out = [`# Client brief: ${c.name}`, '', `Site: ${c.url}`, ''];
+    const bullet = (label, val) => { if ((val || '').trim()) out.push(`- **${label}:** ${val.trim()}`); };
+    const bulletList = (label, val) => {
+      if (!(val || '').trim()) return;
+      out.push(`- **${label}:**`);
+      val.split('\n').map(l => l.trim()).filter(Boolean).forEach(l => out.push(`  - ${l.replace(/^[-*]\s*/, '')}`));
+    };
+
+    out.push('## Business');
+    bullet('Industry', b.industry);
+    bullet('What we do', b.products);
+    bullet('Target customer', b.audience);
+    out.push('');
+
+    out.push('## Voice');
+    bullet('Tone', b.voice_tone);
+    bulletList("Do", b.voice_dos);
+    bulletList("Don't", b.voice_donts);
+    out.push('');
+
+    out.push('## Geography');
+    bullet('Markets', b.markets);
+    bullet('Primary language', b.language);
+    out.push('');
+
+    out.push('## Strategy');
+    bulletList('Priority keywords', b.priority_keywords);
+    bulletList('Competitors', b.competitors);
+    bullet('Goals', b.goals);
+    bullet('Constraints', b.constraints);
+    out.push('');
+
+    out.push('---');
+    out.push('This brief is read by Claude Code on every SEO change made to this site.');
+    return out.join('\n');
+  }
+
+  function bindBrief(root) {
+    const parts = parseHash();
+    const cid = parts[2];
+    if (!cid) return;
+    const c = state.clients.find(x => x.id === cid);
+    if (!c) return;
+    if (!c.brief) c.brief = {};
+
+    root.querySelectorAll('[data-brief-field]').forEach(el => {
+      el.addEventListener('input', () => {
+        c.brief[el.dataset.briefField] = el.value;
+        commit();
+      });
+    });
+
+    root.querySelectorAll('[data-action="copy-brief"]').forEach(b => b.addEventListener('click', () => {
+      const md = briefToMarkdown(c);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(md).then(() => toast('Brief copied as Markdown'));
+      } else {
+        toast('Copy not supported in this browser');
+      }
+    }));
+
+    root.querySelectorAll('[data-action="download-brief"]').forEach(b => b.addEventListener('click', () => {
+      const md = briefToMarkdown(c);
+      const slug = c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'client';
+      const filename = `${slug}-CLAUDE.md`;
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      toast(`Downloaded ${filename}`);
+    }));
   }
 
   /* ---------- ADMIN: Client update (email drafter) ---------- */
@@ -1211,19 +1400,19 @@
       html = viewLogin();
     } else if (parts[0] === 'admin') {
       if (state.session.role !== 'admin') { location.hash = '#/login'; return; }
-      if (parts.length === 1) html = viewAdminRecs();
+      if (parts.length === 1) html = viewAdminClients();
       else if (parts[1] === 'clients' && parts.length === 2) html = viewAdminClients();
       else if (parts[1] === 'clients' && parts[2] === 'new') html = viewNewClient();
       else if (parts[1] === 'clients' && parts[2]) html = viewClient(parts[2], parts[3]);
       else if (parts[1] === 'recommendations') html = viewAdminRecs();
       else if (parts[1] === 'deploys') html = viewDeploys();
       else if (parts[1] === 'settings') html = viewSettings();
-      else html = viewAdminRecs();
+      else html = viewAdminClients();
     } else if (parts[0] === 'portal') {
       location.hash = '#/admin';
       return;
     } else {
-      html = viewAdminRecs();
+      html = viewAdminClients();
     }
 
     app.innerHTML = html;
@@ -1235,6 +1424,7 @@
     bindClientPage(app);
     bindNotesTasks(app);
     bindUpdate(app);
+    bindBrief(app);
     bindTableRows(app);
     bindSearch(app);
   }

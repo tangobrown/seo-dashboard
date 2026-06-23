@@ -26,6 +26,20 @@
           health: 78,
           last_sync: daysAgo(1),
           viewer_email: 'owner@northwindbakery.com',
+          brief: {
+            industry: 'Independent bakery',
+            products: 'Fresh sourdough, seasonal pastries, custom celebration cakes. Counter service plus a small café.',
+            audience: 'Home cooks and food enthusiasts in north-east London, 28-55, who care about provenance and craft over price.',
+            voice_tone: 'Warm, hands-on, knowledgeable without being precious. Like chatting to a baker over the counter.',
+            voice_dos: 'Use specific ingredient names\nMention the bakers by name where relevant\nLean on sensory language (crusty, slow-fermented, golden)',
+            voice_donts: "Don't use food jargon without unpacking it\nNo exclamation marks\nAvoid corporate-y \"products\" / \"customers\" — say \"breads\" / \"regulars\"",
+            markets: 'UK — focus on north-east London',
+            language: 'British English',
+            priority_keywords: 'sourdough bread hackney\nartisan bakery london\nseasonal pastries n16\ncelebration cakes hackney\nbest croissant east london',
+            competitors: 'eltbakery.co.uk — established local rival\nbreadahead.com — bigger London chain\njcbakery.com — newer entrant nearby',
+            goals: 'Drive footfall to the Stoke Newington shop. Build search visibility for celebration cake orders (highest-margin product line).',
+            constraints: 'Owner runs a "summer sourdough" campaign every July — coordinate any landing-page work with that calendar.',
+          },
         },
         {
           id: 'c_skyline',
@@ -39,6 +53,20 @@
           health: 64,
           last_sync: daysAgo(2),
           viewer_email: 'maria@skylinetravel.co',
+          brief: {
+            industry: 'Small-group adventure travel operator',
+            products: 'Curated 8-14 day trips to Iceland, Japan, and Patagonia. Max 12 travellers per group. All-inclusive pricing.',
+            audience: 'Independent travellers, 35-60, who would normally travel solo but want the logistics handled. Higher disposable income; values experience over luxury.',
+            voice_tone: 'Confident, well-travelled, dry sense of humour. Anti-marketing — never use words like "unforgettable" or "journey of a lifetime".',
+            voice_dos: 'Be specific about places, food, distances\nQuote past travellers verbatim where possible\nAdmit trade-offs (it rains, hikes are hard)',
+            voice_donts: 'No superlatives without proof\nNever say "bucket list"\nAvoid stock travel photography language',
+            markets: 'UK + Republic of Ireland primary; Western Europe secondary',
+            language: 'British English',
+            priority_keywords: 'small group iceland tours\nadventure travel japan small group\npatagonia trekking tours uk\nsmall group adventure travel\nguided iceland ring road',
+            competitors: 'exodustravels.com — direct competitor, much bigger\nintrepidtravel.com — broader, also competing on small-group angle\nmuchbetteradventures.com — adventure-only, similar scale to us',
+            goals: 'Rank top-3 for "small group iceland tours" in next 6 months. Grow Japan trip enquiries (lowest current conversion).',
+            constraints: 'Maria asked to deprioritise blog SEO this quarter — focus on /destinations and /tours hub pages.',
+          },
         },
         {
           id: 'c_atlas',
@@ -52,6 +80,7 @@
           health: 86,
           last_sync: daysAgo(1),
           viewer_email: 'sam@atlas-apparel.com',
+          brief: emptyBrief(),
         },
         {
           id: 'c_verdant',
@@ -65,6 +94,7 @@
           health: 71,
           last_sync: daysAgo(3),
           viewer_email: 'lila@verdantyoga.studio',
+          brief: emptyBrief(),
         },
       ],
       recommendations: [
@@ -132,6 +162,16 @@
     };
   };
 
+  function emptyBrief() {
+    return {
+      industry: '', products: '', audience: '',
+      voice_tone: '', voice_dos: '', voice_donts: '',
+      markets: '', language: '',
+      priority_keywords: '', competitors: '',
+      goals: '', constraints: '',
+    };
+  }
+
   function rec(id, client_id, type, title, description, category, status, created_at) {
     return { id, client_id, type, title, description, category, status, source: 'siteguru', created_at };
   }
@@ -190,6 +230,7 @@
         const s = JSON.parse(raw);
         if (!s.drafts) s.drafts = {};
         if (!s.sent_emails) s.sent_emails = [];
+        if (s.clients) s.clients.forEach(c => { if (!c.brief) c.brief = emptyBrief(); });
         return s;
       }
     } catch (e) { /* ignore */ }
