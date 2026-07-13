@@ -1,27 +1,123 @@
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { SiteGuruClient } from "../client";
+import {
+  flattenTodo,
+  normalizeSites,
+  normalizeTraffic,
+  type NormalizedTask,
+  type SiteGuruSite,
+  type TrafficOverview,
+} from "../types";
+
+const MCP_URL = new URL("https://mcp.siteguru.co/mcp");
+const CLIENT_INFO = { name: "seo-autopilot", version: "0.1.0" };
 
 /**
- * Production transport (NOT YET WIRED — plan R1).
- *
- * The SiteGuru MCP at https://mcp.siteguru.co/mcp authenticates via OAuth, and
- * that session currently lives in the Claude desktop app — a headless server
- * can't reuse it. Before enabling this transport we must confirm SiteGuru's
- * server-to-server auth (a static API token vs OAuth client-credentials). Once
- * confirmed, implement an MCP Streamable-HTTP client here that calls
- * `list_sites` and `get_todo_list`, then normalize with the shared helpers in
- * ../types (normalizeSites / flattenTodo) — the transform/categorize/upsert code
- * downstream does not change.
+ * Production transport. Uses SiteGuru's MCP server-to-server auth (a static
+ * Bearer token from https://app.siteguru.co/mcp_keys) — distinct from the
+ * OAuth flow Claude Desktop uses. Each call opens a fresh Streamable-HTTP
+ * client because the sync runs stateless (cron + server actions); long-lived
+ * connections don't fit serverless invocations.
  */
 export function createMcpTransport(): SiteGuruClient {
-  const notWired = () => {
-    throw new Error(
-      "SiteGuru MCP transport is not wired yet. Confirm server-to-server auth " +
-        "(plan R1), then implement mcp-http.ts. Use SITEGURU_TRANSPORT=fixture for now.",
-    );
-  };
+  const apiKey = process.env.SITEGURU_API_KEY;
+  if (!apiKey) {
+    const explain = () => {
+      throw new Error(
+        "SITEGURU_API_KEY is not set. Create a key at " +
+          "https://app.siteguru.co/mcp_keys and add it to your env, or set " +
+          "SITEGURU_TRANSPORT=fixture to use the captured payload.",
+      );
+    };
+    return {
+      listSites: explain,
+      getTodoTasks: explain,
+      getTrafficOverview: explain,
+    };
+  }
+
+  async function callTool(
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<unknown> {
+    const transport = new StreamableHTTPClientTransport(MCP_URL, {
+      requestInit: {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      },
+    });
+    const client = new Client(CLIENT_INFO);
+    try {
+      await client.connect(transport);
+      const res = await client.callTool({ name, arguments: args });
+      if (res.isError) {
+        const message = extractText(res.content) ?? `MCP ${name} returned isError`;
+        throw new Error(`SiteGuru ${name}: ${message}`);
+      }
+      // Prefer structuredContent when the server provides it (newer MCP spec).
+      if (res.structuredContent !== undefined) return res.structuredContent;
+      const text = extractText(res.content);
+      if (text === null) {
+        throw new Error(`SiteGuru ${name}: no text content in response`);
+      }
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error(
+          `SiteGuru ${name}: response is not valid JSON (${String(err)})`,
+        );
+      }
+    } finally {
+      await client.close().catch(() => {
+        // Swallow close errors — the important work is done.
+      });
+    }
+  }
+
   return {
-    listSites: notWired,
-    getTodoTasks: notWired,
-    getTrafficOverview: notWired,
+    async listSites(): Promise<SiteGuruSite[]> {
+      const data = await callTool("list_sites", {
+        context: "SEO Autopilot sync — listing SiteGuru sites for the portfolio.",
+      });
+      return normalizeSites(data);
+    },
+    async getTodoTasks(domain: string): Promise<NormalizedTask[]> {
+      const data = await callTool("get_todo_list", {
+        site: domain,
+        context:
+          "SEO Autopilot sync — pulling the SEO to-do list for a managed client.",
+      });
+      return flattenTodo(data);
+    },
+    async getTrafficOverview(domain: string): Promise<TrafficOverview | null> {
+      try {
+        const data = await callTool("get_traffic_overview", {
+          site: domain,
+          context:
+            "SEO Autopilot sync — refreshing the traffic snapshot (GSC + GA4) for a managed client.",
+        });
+        return normalizeTraffic(data);
+      } catch (err) {
+        console.warn(`[siteguru] getTrafficOverview(${domain}) failed:`, err);
+        return null;
+      }
+    },
   };
+}
+
+function extractText(content: unknown): string | null {
+  if (!Array.isArray(content)) return null;
+  for (const part of content) {
+    if (
+      part &&
+      typeof part === "object" &&
+      "type" in part &&
+      (part as { type: unknown }).type === "text" &&
+      "text" in part &&
+      typeof (part as { text: unknown }).text === "string"
+    ) {
+      return (part as { text: string }).text;
+    }
+  }
+  return null;
 }

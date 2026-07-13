@@ -46,7 +46,18 @@ Project → **SQL Editor** → New query → paste the contents of
 cp .env.local.example .env.local
 ```
 
-Fill in the three Supabase values from step 2. Leave `SITEGURU_TRANSPORT=fixture`.
+Fill in the three Supabase values from step 2.
+
+For SiteGuru, pick one:
+
+- **Fixture (offline, deterministic)** — leave `SITEGURU_TRANSPORT=fixture` and
+  `SITEGURU_API_KEY` blank. Reads a captured payload from
+  `supabase/seed/siteguru-devonjoinery.json`. Good for local dev and CI.
+- **Live MCP pulls** — set `SITEGURU_TRANSPORT=mcp` and paste an API key from
+  [app.siteguru.co/mcp_keys](https://app.siteguru.co/mcp_keys) into
+  `SITEGURU_API_KEY`. The key is a static Bearer token (distinct from the OAuth
+  flow Claude Desktop uses); it's per-tool, last-used-timestamped, and
+  revocable from the same page.
 
 ## 6. Run it
 
@@ -77,7 +88,8 @@ un-prefixed so it stays server-only), and deploy.
 
 ## Follow-up (not blocking)
 
-`SITEGURU_TRANSPORT=fixture` reads a captured real payload. Switching to live
-weekly pulls needs SiteGuru's server-to-server auth confirmed and the
-`src/lib/siteguru/transports/mcp-http.ts` transport implemented — see the plan's
-risk R1.
+R1 (SiteGuru server-to-server auth) is resolved: SiteGuru's MCP accepts a static
+API key as a `Authorization: Bearer <key>` header, and the transport at
+`src/lib/siteguru/transports/mcp-http.ts` is wired against
+`@modelcontextprotocol/sdk`'s Streamable-HTTP client. Flip `SITEGURU_TRANSPORT=mcp`
++ set `SITEGURU_API_KEY` to move off the captured fixture.

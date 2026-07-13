@@ -22,7 +22,7 @@ Actions + headless Claude Code; **this milestone stops before any site editing.*
 - `src/app/(admin)/…` — admin app (clients, client tabs, settings, deploys). Guarded by `requireAdmin`.
 - `src/app/(viewer)/portal` — read-only client portal. Guarded by `requireViewer`.
 - `src/lib/supabase/{server,client,admin}.ts` — session client (RLS), browser client, and service-role client (`server-only`, bypasses RLS).
-- `src/lib/siteguru/` — ingestion. `SiteGuruClient` interface with swappable transport (`SITEGURU_TRANSPORT`): `fixture` (real captured data, default) or `mcp` (not yet wired — see plan R1). `categorize.ts` maps SiteGuru `check_name` → auto/manual.
+- `src/lib/siteguru/` — ingestion. `SiteGuruClient` interface with swappable transport (`SITEGURU_TRANSPORT`): `fixture` (captured payload, default and offline) or `mcp` (live pulls via `@modelcontextprotocol/sdk` Streamable-HTTP against `mcp.siteguru.co/mcp`, auth via `SITEGURU_API_KEY` Bearer token). `categorize.ts` maps SiteGuru `check_name` → auto/manual.
 - `src/lib/actions/` — server actions (clients, recommendations, notes, auth).
 - Accepting a rec updates status + writes `audit_log`; the Phase-2 seam (dispatch a repo workflow) is marked with a comment in `src/lib/actions/recommendations.ts`.
 
