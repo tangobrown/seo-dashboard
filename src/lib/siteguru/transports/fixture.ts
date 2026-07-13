@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { SiteGuruClient } from "../client";
 import {
   flattenTodo,
@@ -8,33 +6,23 @@ import {
   type NormalizedTask,
   type SiteGuruSite,
 } from "../types";
+// Static import so the payload is bundled into the serverless function on Vercel
+// (a runtime readFileSync would not be traced into the deploy).
+import fixture from "../../../../supabase/seed/siteguru-devonjoinery.json";
 
 /**
- * Reads the real SiteGuru payload captured live into
+ * Serves the real SiteGuru payload captured live into
  * supabase/seed/siteguru-devonjoinery.json. Deterministic and offline — this is
  * the "real data now" bridge while server-side SiteGuru auth is confirmed.
  */
-function loadFixture(): { sites: unknown; todo: Record<string, unknown> } {
-  const path = join(
-    process.cwd(),
-    "supabase",
-    "seed",
-    "siteguru-devonjoinery.json",
-  );
-  return JSON.parse(readFileSync(path, "utf8"));
-}
-
 export function createFixtureTransport(): SiteGuruClient {
   return {
     async listSites(): Promise<SiteGuruSite[]> {
-      const data = loadFixture();
-      return normalizeSites(data);
+      return normalizeSites(fixture);
     },
     async getTodoTasks(domain: string): Promise<NormalizedTask[]> {
-      const data = loadFixture();
       const key = normalizeDomain(domain);
-      const todoByDomain = data.todo ?? {};
-      // Match the fixture key by normalized domain.
+      const todoByDomain = (fixture as { todo?: Record<string, unknown> }).todo ?? {};
       const entry = Object.entries(todoByDomain).find(
         ([k]) => normalizeDomain(k) === key,
       );
