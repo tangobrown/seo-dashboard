@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "siteguru": {
+      "type": "http",
+      "url": "https://mcp.siteguru.co/mcp"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "_comment": "Real SiteGuru payload captured live via the MCP on 2026-07-13 for the fixture transport. Used by the local sync script until server-to-server SiteGuru auth is confirmed (see plan R1). Note: SiteGuru's audit still reflected the old WordPress site at capture time.",
+  "sites": [
+    {
+      "domain": "https://www.devonjoinery.co.uk",
+      "health_score": 69,
+      "default_range": "last_90_days",
+      "data_sources": {
+        "search_console": { "connected": true, "clicks": 105 },
+        "analytics": { "connected": true, "sessions": 542 }
+      }
+    },
+    {
+      "domain": "https://www.projuice.co.uk",
+      "health_score": 86,
+      "default_range": "last_90_days",
+      "data_sources": {
+        "search_console": { "connected": true, "clicks": 10524 },
+        "analytics": { "connected": true, "sessions": 40542 }
+      }
+    }
+  ],
+  "todo": {
+    "devonjoinery.co.uk": {
+      "site": "https://www.devonjoinery.co.uk",
+      "site_context": {
+        "domain": "https://www.devonjoinery.co.uk",
+        "cms": "wordpress",
+        "homepage": {
+          "title": "Devon Joinery | Bespoke Doors, Windows & Staircases in Exeter",
+          "meta_description": "Family-run bespoke joinery workshop in Exeter. Over 25 years crafting doors, windows, staircases, balustrades, gates, wardrobes, media units and reception counters across Devon."
+        }
+      },
+      "todo": {
+        "tech": {
+          "type": "tech",
+          "tasks": [
+            { "check_name": "noindex_nofollow", "title": "Make pages indexable", "text": "All pages cannot be indexed by search engines", "result": "warning", "consequences": "Indexation issues prevent pages from being indexed by search engines. Check if this is intentional", "affected_pages": 17, "fix_link": { "0": 542723, "controller": "sites", "action": "indexability_report" }, "type": "tech", "severity": "high" },
+            { "check_name": "canonical", "title": "Optimize your canonical URLs", "result": "warning", "consequences": "Canonical URLs help you control which URLs are indexed and avoid duplicate content", "affected_pages": 17, "fix_link": { "0": 542723, "controller": "sites", "action": "canonical_report" }, "type": "tech", "severity": "high" },
+            { "check_name": "internal_redirects", "text": "222 internal links are redirected", "result": "suggestion", "fix_link": { "0": 542723, "controller": "sites", "action": "internal_redirects" }, "title": "Avoid internal redirects", "affected_pages": 17, "consequences": "Internal redirects make your website unnecessarily slow and hard to index", "type": "tech", "severity": "medium" },
+            { "check_name": "pagespeed", "title": "Improve page speed", "consequences": "Slow pages give your visitors a bad experience and can hurt your search engine rankings", "affected_pages": 6, "text": "6 pages are too slow", "fix_link": { "0": 542723, "controller": "sites", "action": "pagespeed_report" }, "result": "suggestion", "type": "tech", "severity": "medium" }
+          ]
+        },
+        "content": {
+          "type": "content",
+          "tasks": [
+            { "check_name": "title", "title": "Improve page titles", "text": "4 pages have issues with their page titles", "consequences": "Issues with page titles can hurt your rankings and visibility on the search results page", "affected_pages": 4, "fix_link": { "0": "title", "1": 542723, "controller": "sites", "action": "report" }, "result": "suggestion", "type": "content", "severity": "medium" },
+            { "check_name": "meta_description", "consequences": "Issues with meta descriptions can hurt the click-through rate from search engines", "title": "Improve meta descriptions", "text": "3 pages have issues with their meta descriptions", "affected_pages": 3, "fix_link": { "0": "meta_description", "1": 542723, "controller": "sites", "action": "report" }, "result": "suggestion", "type": "content", "severity": "medium" },
+            { "check_name": "og_tags", "title": "Add OpenGraph tags for easier sharing", "consequences": "OpenGraph tags help your site stand out when a link is shared in social media", "text": "8 pages do not have a OpenGraph tags", "affected_pages": 8, "result": "suggestion", "fix_link": { "0": 542723, "1": "og_tags", "controller": "sites", "action": "check_report" }, "type": "content", "severity": "medium" },
+            { "check_name": "orphan_pages", "title": "Improve internal linking", "text": "1 page does not have internal links to it. Pages without internal links will be harder to find and rank", "consequences": "Pages without any internal links will likely not rank well. Add internal links to increase the visibility of those pages", "affected_pages": 1, "result": "suggestion", "fix_link": { "0": 542723, "controller": "sites", "action": "internal_link_report" }, "type": "content", "severity": "medium" }
+          ]
+        },
+        "opportunity": {
+          "type": "opportunity",
+          "tasks": [
+            { "check_name": "backlinks", "title": "Get more backlinks", "is_sitewide": true, "text": "The site has a domain ranking of 16 / 100. To increase your authority, we recommend getting more backlinks.", "consequences": "Without enough quality backlinks, your site lacks the authority signals search engines use to rank pages.", "result": "suggestion", "fix_link": { "0": 542723, "controller": "backlink_results", "action": "view" }, "type": "opportunity", "severity": "medium" }
+          ]
+        }
+      }
+    }
+  }
+}
