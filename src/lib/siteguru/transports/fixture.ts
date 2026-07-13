@@ -3,8 +3,10 @@ import {
   flattenTodo,
   normalizeDomain,
   normalizeSites,
+  normalizeTraffic,
   type NormalizedTask,
   type SiteGuruSite,
+  type TrafficOverview,
 } from "../types";
 // Static import so the payload is bundled into the serverless function on Vercel
 // (a runtime readFileSync would not be traced into the deploy).
@@ -28,6 +30,16 @@ export function createFixtureTransport(): SiteGuruClient {
       );
       if (!entry) return [];
       return flattenTodo(entry[1]);
+    },
+    async getTrafficOverview(domain: string): Promise<TrafficOverview | null> {
+      const key = normalizeDomain(domain);
+      const trafficByDomain =
+        (fixture as { traffic?: Record<string, unknown> }).traffic ?? {};
+      const entry = Object.entries(trafficByDomain).find(
+        ([k]) => normalizeDomain(k) === key,
+      );
+      if (!entry) return null;
+      return normalizeTraffic(entry[1]);
     },
   };
 }

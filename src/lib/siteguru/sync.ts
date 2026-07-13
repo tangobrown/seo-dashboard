@@ -52,8 +52,17 @@ export async function syncClientRecommendations(
     // non-fatal
   }
 
+  // Refresh the traffic snapshot (best-effort).
+  let traffic = null;
+  try {
+    traffic = await sg.getTrafficOverview(domain);
+  } catch {
+    // non-fatal
+  }
+
   const patch: Record<string, unknown> = { last_sync: now };
   if (health !== null) patch.health = health;
+  if (traffic !== null) patch.traffic = traffic;
   await admin.from("clients").update(patch).eq("id", client.id);
 
   await admin.from("audit_log").insert({

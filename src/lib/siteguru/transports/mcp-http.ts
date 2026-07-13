@@ -22,5 +22,6 @@ export function createMcpTransport(): SiteGuruClient {
   return {
     listSites: notWired,
     getTodoTasks: notWired,
+    getTrafficOverview: notWired,
   };
 }

@@ -1,4 +1,5 @@
-/** Domain types mirroring the Postgres schema (supabase/migrations/0001_init.sql). */
+/** Domain types mirroring the Postgres schema (supabase/migrations/). */
+import type { TrafficOverview } from "@/lib/siteguru/types";
 
 export type UserRole = "admin" | "viewer";
 export type RecType = "auto" | "manual";
@@ -19,6 +20,7 @@ export type Client = {
   viewer_email: string | null;
   health: number | null;
   brief: ClientBrief;
+  traffic: TrafficOverview | null;
   last_sync: string | null;
   created_by: string | null;
   created_at: string;

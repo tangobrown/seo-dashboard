@@ -1,5 +1,5 @@
 {
-  "_comment": "Real SiteGuru payload captured live via the MCP on 2026-07-13 for the fixture transport. Used by the local sync script until server-to-server SiteGuru auth is confirmed (see plan R1). Note: SiteGuru's audit still reflected the old WordPress site at capture time.",
+  "_comment": "Real SiteGuru payload captured live via the MCP on 2026-07-13 for the fixture transport. Used by the local sync script until server-to-server SiteGuru auth is confirmed (see plan R1). Note: SiteGuru's issue audit still reflected the old WordPress site at capture time, but the traffic data reflects the new Next.js site.",
   "sites": [
     {
       "domain": "https://www.devonjoinery.co.uk",
@@ -57,6 +57,42 @@
           ]
         }
       }
+    }
+  },
+  "traffic": {
+    "devonjoinery.co.uk": {
+      "period_label": "Last 90 days (2026-04-12 → 2026-07-10)",
+      "search_console": {
+        "status": "ok",
+        "clicks": { "value": 105, "previous": 65, "delta_pct": 61.5 },
+        "impressions": { "value": 11087, "previous": 6570, "delta_pct": 68.8 },
+        "ctr": { "value": 0.95, "previous": 0.99, "delta_pct": -4.3 }
+      },
+      "analytics": {
+        "status": "ok",
+        "sessions": { "value": 541, "previous": 394, "delta_pct": 37.3 },
+        "users": { "value": 404, "previous": 310, "delta_pct": 30.3 }
+      },
+      "top_pages": [
+        { "path": "/", "clicks": 43, "impressions": 4136, "avg_position": 28 },
+        { "path": "/about", "clicks": 2, "impressions": 124, "avg_position": 11 },
+        { "path": "/expertise/windows", "clicks": 1, "impressions": 1191, "avg_position": 45 },
+        { "path": "/contact", "clicks": 1, "impressions": 464, "avg_position": 18 },
+        { "path": "/expertise/doors", "clicks": 0, "impressions": 3034, "avg_position": 37 },
+        { "path": "/expertise/wardrobes-and-storage", "clicks": 0, "impressions": 660, "avg_position": 51 },
+        { "path": "/expertise/staircases", "clicks": 0, "impressions": 472, "avg_position": 33 },
+        { "path": "/gallery", "clicks": 0, "impressions": 20, "avg_position": 14 }
+      ],
+      "top_queries": [
+        { "keyword": "devon joinery", "clicks": 39, "impressions": 168, "ctr": 0.23, "avg_position": 3.3 },
+        { "keyword": "joinery devon", "clicks": 2, "impressions": 47, "ctr": 0.04, "avg_position": 4.2 },
+        { "keyword": "joinery exeter", "clicks": 2, "impressions": 95, "ctr": 0.02, "avg_position": 6.2 },
+        { "keyword": "carpenters exeter", "clicks": 1, "impressions": 60, "ctr": 0.02, "avg_position": 28.2 },
+        { "keyword": "joiner exeter", "clicks": 1, "impressions": 22, "ctr": 0.05, "avg_position": 11.8 },
+        { "keyword": "joiners exeter", "clicks": 1, "impressions": 168, "ctr": 0.01, "avg_position": 9.7 },
+        { "keyword": "joinery east devon", "clicks": 1, "impressions": 20, "ctr": 0.05, "avg_position": 21.1 },
+        { "keyword": "bespoke carpentry in exeter", "clicks": 0, "impressions": 130, "ctr": 0, "avg_position": 5.9 }
+      ]
     }
   }
 }

@@ -109,6 +109,61 @@ export const listSitesSchema = z
   .object({ sites: z.array(siteSchema) })
   .passthrough();
 
+export type MetricDelta = {
+  value: number;
+  previous?: number;
+  delta_pct?: number | null;
+};
+
+export type TrafficTopPage = {
+  path: string;
+  clicks: number;
+  impressions: number;
+  avg_position: number;
+  pageviews?: number;
+};
+
+export type TrafficTopQuery = {
+  keyword: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  avg_position: number;
+};
+
+export type TrafficOverview = {
+  period_label?: string;
+  search_console?: {
+    status?: string;
+    clicks?: MetricDelta;
+    impressions?: MetricDelta;
+    ctr?: MetricDelta;
+  };
+  analytics?: {
+    status?: string;
+    sessions?: MetricDelta;
+    users?: MetricDelta;
+  };
+  top_pages?: TrafficTopPage[];
+  top_queries?: TrafficTopQuery[];
+};
+
+const trafficSchema = z
+  .object({
+    period_label: z.string().optional(),
+    search_console: z.record(z.string(), z.unknown()).optional(),
+    analytics: z.record(z.string(), z.unknown()).optional(),
+    top_pages: z.array(z.record(z.string(), z.unknown())).optional(),
+    top_queries: z.array(z.record(z.string(), z.unknown())).optional(),
+  })
+  .passthrough();
+
+export function normalizeTraffic(input: unknown): TrafficOverview | null {
+  const parsed = trafficSchema.safeParse(input);
+  if (!parsed.success) return null;
+  return parsed.data as TrafficOverview;
+}
+
 export type SiteGuruSite = { domain: string; healthScore: number | null };
 
 export function normalizeSites(input: unknown): SiteGuruSite[] {

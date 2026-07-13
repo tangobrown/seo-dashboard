@@ -1,4 +1,4 @@
-import type { NormalizedTask, SiteGuruSite } from "./types";
+import type { NormalizedTask, SiteGuruSite, TrafficOverview } from "./types";
 import { createFixtureTransport } from "./transports/fixture";
 import { createMcpTransport } from "./transports/mcp-http";
 
@@ -11,6 +11,7 @@ import { createMcpTransport } from "./transports/mcp-http";
 export interface SiteGuruClient {
   listSites(): Promise<SiteGuruSite[]>;
   getTodoTasks(domain: string): Promise<NormalizedTask[]>;
+  getTrafficOverview(domain: string): Promise<TrafficOverview | null>;
 }
 
 export function getSiteGuruClient(): SiteGuruClient {

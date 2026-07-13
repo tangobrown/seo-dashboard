@@ -1,6 +1,7 @@
 import { requireViewer } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { HealthBar } from "@/components/HealthBar";
+import { TrafficKpis } from "@/components/Analytics";
 import type { Client, Recommendation } from "@/lib/types";
 
 export default async function PortalPage() {
@@ -57,6 +58,12 @@ export default async function PortalPage() {
           <HealthBar score={client.health} width={140} large />
         </div>
       </div>
+
+      {client.traffic && (
+        <div style={{ marginBottom: 24 }}>
+          <TrafficKpis traffic={client.traffic} />
+        </div>
+      )}
 
       <div className="grid cols-2">
         <div className="stack lg">

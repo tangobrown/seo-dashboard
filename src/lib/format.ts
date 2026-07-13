@@ -1,5 +1,23 @@
 /** Small presentation helpers shared across the dashboard. */
 
+export function formatNumber(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "—";
+  return n.toLocaleString();
+}
+
+/** Format a percentage delta like "+37.3%" / "−4.3%" (or null → ""). */
+export function formatDelta(pct: number | null | undefined): {
+  text: string;
+  dir: "up" | "down" | "flat";
+} {
+  if (pct == null || Number.isNaN(pct)) return { text: "", dir: "flat" };
+  const rounded = Math.round(pct * 10) / 10;
+  if (rounded === 0) return { text: "0%", dir: "flat" };
+  const dir = rounded > 0 ? "up" : "down";
+  const sign = rounded > 0 ? "+" : "−";
+  return { text: `${sign}${Math.abs(rounded)}%`, dir };
+}
+
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
